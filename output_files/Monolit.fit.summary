@@ -1,0 +1,16 @@
+Fitter Status : Successful - Tue Jan  2 02:48:36 2024
+Quartus Prime Version : 22.1std.2 Build 922 07/20/2023 SC Lite Edition
+Revision Name : Monolit
+Top-level Entity Name : RF
+Family : Cyclone IV E
+Device : EP4CE10F17C8
+Timing Models : Final
+Total logic elements : 994 / 10,320 ( 10 % )
+    Total combinational functions : 994 / 10,320 ( 10 % )
+    Dedicated logic registers : 128 / 10,320 ( 1 % )
+Total registers : 128
+Total pins : 149 / 180 ( 83 % )
+Total virtual pins : 0
+Total memory bits : 0 / 423,936 ( 0 % )
+Embedded Multiplier 9-bit elements : 0 / 46 ( 0 % )
+Total PLLs : 0 / 2 ( 0 % )
