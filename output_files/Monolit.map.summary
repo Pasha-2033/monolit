@@ -1,14 +1,14 @@
-Analysis & Synthesis Status : Successful - Tue Jan  2 02:48:27 2024
+Analysis & Synthesis Status : Failed - Wed Mar 13 10:44:20 2024
 Quartus Prime Version : 22.1std.2 Build 922 07/20/2023 SC Lite Edition
 Revision Name : Monolit
-Top-level Entity Name : RF
+Top-level Entity Name : main
 Family : Cyclone IV E
-Total logic elements : 994
-    Total combinational functions : 994
-    Dedicated logic registers : 128
-Total registers : 128
-Total pins : 149
-Total virtual pins : 0
-Total memory bits : 0
-Embedded Multiplier 9-bit elements : 0
-Total PLLs : 0
+Total logic elements : N/A until Partition Merge
+    Total combinational functions : N/A until Partition Merge
+    Dedicated logic registers : N/A until Partition Merge
+Total registers : N/A until Partition Merge
+Total pins : N/A until Partition Merge
+Total virtual pins : N/A until Partition Merge
+Total memory bits : N/A until Partition Merge
+Embedded Multiplier 9-bit elements : N/A until Partition Merge
+Total PLLs : N/A until Partition Merge

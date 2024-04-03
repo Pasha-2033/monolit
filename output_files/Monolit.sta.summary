@@ -2,16 +2,112 @@
 Timing Analyzer Summary
 ------------------------------------------------------------
 
+Type  : Slow 1200mV 85C Model Setup 'clk'
+Slack : -4.083
+TNS   : -46.716
+
+Type  : Slow 1200mV 85C Model Setup 'UART_N:uart_n|clk_R_sync[0]'
+Slack : -2.075
+TNS   : -21.345
+
+Type  : Slow 1200mV 85C Model Setup 'UART_N:uart_n|clk_reductor[0]'
+Slack : -1.132
+TNS   : -10.029
+
+Type  : Slow 1200mV 85C Model Hold 'UART_N:uart_n|clk_reductor[0]'
+Slack : -0.511
+TNS   : -2.032
+
+Type  : Slow 1200mV 85C Model Hold 'UART_N:uart_n|clk_R_sync[0]'
+Slack : 0.452
+TNS   : 0.000
+
+Type  : Slow 1200mV 85C Model Hold 'clk'
+Slack : 0.719
+TNS   : 0.000
+
 Type  : Slow 1200mV 85C Model Minimum Pulse Width 'clk'
 Slack : -3.000
-TNS   : -193.336
+TNS   : -20.844
+
+Type  : Slow 1200mV 85C Model Minimum Pulse Width 'UART_N:uart_n|clk_reductor[0]'
+Slack : -1.487
+TNS   : -32.714
+
+Type  : Slow 1200mV 85C Model Minimum Pulse Width 'UART_N:uart_n|clk_R_sync[0]'
+Slack : -1.487
+TNS   : -19.331
+
+Type  : Slow 1200mV 0C Model Setup 'clk'
+Slack : -3.749
+TNS   : -43.158
+
+Type  : Slow 1200mV 0C Model Setup 'UART_N:uart_n|clk_R_sync[0]'
+Slack : -1.860
+TNS   : -19.861
+
+Type  : Slow 1200mV 0C Model Setup 'UART_N:uart_n|clk_reductor[0]'
+Slack : -0.943
+TNS   : -8.857
+
+Type  : Slow 1200mV 0C Model Hold 'UART_N:uart_n|clk_reductor[0]'
+Slack : -0.536
+TNS   : -2.129
+
+Type  : Slow 1200mV 0C Model Hold 'UART_N:uart_n|clk_R_sync[0]'
+Slack : 0.401
+TNS   : 0.000
+
+Type  : Slow 1200mV 0C Model Hold 'clk'
+Slack : 0.602
+TNS   : 0.000
 
 Type  : Slow 1200mV 0C Model Minimum Pulse Width 'clk'
 Slack : -3.000
-TNS   : -193.336
+TNS   : -20.844
+
+Type  : Slow 1200mV 0C Model Minimum Pulse Width 'UART_N:uart_n|clk_reductor[0]'
+Slack : -1.487
+TNS   : -33.247
+
+Type  : Slow 1200mV 0C Model Minimum Pulse Width 'UART_N:uart_n|clk_R_sync[0]'
+Slack : -1.487
+TNS   : -19.331
+
+Type  : Fast 1200mV 0C Model Setup 'clk'
+Slack : -1.058
+TNS   : -11.775
+
+Type  : Fast 1200mV 0C Model Setup 'UART_N:uart_n|clk_R_sync[0]'
+Slack : -0.274
+TNS   : -2.002
+
+Type  : Fast 1200mV 0C Model Setup 'UART_N:uart_n|clk_reductor[0]'
+Slack : 0.088
+TNS   : 0.000
+
+Type  : Fast 1200mV 0C Model Hold 'UART_N:uart_n|clk_reductor[0]'
+Slack : -0.196
+TNS   : -0.777
+
+Type  : Fast 1200mV 0C Model Hold 'UART_N:uart_n|clk_R_sync[0]'
+Slack : 0.186
+TNS   : 0.000
+
+Type  : Fast 1200mV 0C Model Hold 'clk'
+Slack : 0.211
+TNS   : 0.000
 
 Type  : Fast 1200mV 0C Model Minimum Pulse Width 'clk'
 Slack : -3.000
-TNS   : -139.304
+TNS   : -15.429
+
+Type  : Fast 1200mV 0C Model Minimum Pulse Width 'UART_N:uart_n|clk_reductor[0]'
+Slack : -1.000
+TNS   : -22.000
+
+Type  : Fast 1200mV 0C Model Minimum Pulse Width 'UART_N:uart_n|clk_R_sync[0]'
+Slack : -1.000
+TNS   : -13.000
 
 ------------------------------------------------------------

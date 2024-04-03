@@ -4,583 +4,235 @@
 			"name" : "Top",
 			"pins" : [
 				{
-					"name" : "cell_OUT_A[0][0]",
+					"name" : "D_OUT[0]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[0][1]",
+					"name" : "D_OUT[1]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[0][2]",
+					"name" : "D_OUT[2]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[0][3]",
+					"name" : "D_OUT[3]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[0][4]",
+					"name" : "D_OUT[4]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[0][5]",
+					"name" : "D_OUT[5]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[0][6]",
+					"name" : "D_OUT[6]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[0][7]",
+					"name" : "D_OUT[7]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[1][0]",
+					"name" : "D_OUT[8]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[1][1]",
+					"name" : "D_OUT[9]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[1][2]",
+					"name" : "D_OUT[10]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[1][3]",
+					"name" : "D_OUT[11]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[1][4]",
+					"name" : "D_OUT[12]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[1][5]",
+					"name" : "D_OUT[13]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[1][6]",
+					"name" : "D_OUT[14]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[1][7]",
+					"name" : "D_OUT[15]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[2][0]",
+					"name" : "D_OUT[16]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[2][1]",
+					"name" : "D_OUT[17]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[2][2]",
+					"name" : "D_OUT[18]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[2][3]",
+					"name" : "D_OUT[19]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[2][4]",
+					"name" : "D_OUT[20]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[2][5]",
+					"name" : "D_OUT[21]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[2][6]",
+					"name" : "D_OUT[22]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[2][7]",
+					"name" : "D_OUT[23]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[3][0]",
+					"name" : "D_OUT[24]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[3][1]",
+					"name" : "D_IN[0]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[3][2]",
+					"name" : "D_IN[16]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[3][3]",
+					"name" : "D_IN[1]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[3][4]",
+					"name" : "D_IN[17]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[3][5]",
+					"name" : "D_IN[2]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[3][6]",
+					"name" : "D_IN[18]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_A[3][7]",
+					"name" : "D_IN[3]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[0][0]",
+					"name" : "D_IN[19]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[0][1]",
+					"name" : "D_IN[4]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[0][2]",
+					"name" : "D_IN[20]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[0][3]",
+					"name" : "D_IN[5]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[0][4]",
+					"name" : "D_IN[21]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[0][5]",
+					"name" : "D_IN[6]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[0][6]",
+					"name" : "D_IN[22]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[0][7]",
+					"name" : "D_IN[7]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[1][0]",
+					"name" : "D_IN[23]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[1][1]",
+					"name" : "D_IN[8]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[1][2]",
+					"name" : "D_IN[24]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[1][3]",
+					"name" : "D_IN[9]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[1][4]",
+					"name" : "D_IN[25]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[1][5]",
+					"name" : "D_IN[10]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[1][6]",
+					"name" : "D_IN[26]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[1][7]",
+					"name" : "D_IN[11]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[2][0]",
+					"name" : "D_IN[27]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[2][1]",
+					"name" : "D_IN[12]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[2][2]",
+					"name" : "D_IN[28]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[2][3]",
+					"name" : "D_IN[13]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[2][4]",
+					"name" : "D_IN[29]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[2][5]",
+					"name" : "D_IN[14]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[2][6]",
+					"name" : "D_IN[30]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[2][7]",
+					"name" : "D_IN[15]",
 					"strict" : false
 				},
 				{
-					"name" : "cell_OUT_B[3][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_OUT_B[3][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_OUT_B[3][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_OUT_B[3][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_OUT_B[3][4]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_OUT_B[3][5]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_OUT_B[3][6]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_OUT_B[3][7]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[0][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[0][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[0][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[0][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[1][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[1][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[1][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[1][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[2][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[2][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[2][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[2][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[3][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[3][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[3][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_A[3][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[0][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[0][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[0][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[0][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[1][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[1][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[1][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[1][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[2][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[2][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[2][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[2][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[3][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[3][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[3][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_B[3][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[3][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[3][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[3][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[3][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[3][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[1][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[1][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[1][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[1][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[2][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[2][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[2][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[2][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[0][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[2][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[1][0]",
+					"name" : "D_IN[31]",
 					"strict" : false
 				},
 				{
 					"name" : "clk",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[0][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[0][0]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[0][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_SEL_C[0][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[0][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[3][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[2][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[1][1]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[3][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[0][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[2][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[1][2]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[0][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[3][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[2][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[1][3]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[3][4]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[0][4]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[2][4]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[1][4]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[0][5]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[3][5]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[2][5]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[1][5]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[3][6]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[0][6]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[2][6]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[1][6]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[0][7]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[3][7]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[2][7]",
-					"strict" : false
-				},
-				{
-					"name" : "cell_IN[1][7]",
 					"strict" : false
 				}
 			]

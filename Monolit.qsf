@@ -39,7 +39,7 @@
 
 set_global_assignment -name FAMILY "Cyclone IV E"
 set_global_assignment -name DEVICE EP4CE10F17C8
-set_global_assignment -name TOP_LEVEL_ENTITY RF
+set_global_assignment -name TOP_LEVEL_ENTITY main
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 22.1STD.2
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "02:27:30  DECEMBER 16, 2023"
 set_global_assignment -name LAST_QUARTUS_VERSION "22.1std.2 Lite Edition"
@@ -57,10 +57,15 @@ set_global_assignment -name EDA_GENERATE_FUNCTIONAL_NETLIST OFF -section_id eda_
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 8
-set_global_assignment -name SYSTEMVERILOG_FILE core/RF.sv
-set_global_assignment -name SYSTEMVERILOG_FILE components/utils.sv
-set_global_assignment -name SYSTEMVERILOG_FILE core/ALU.sv
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name SYNCHRONIZER_IDENTIFICATION AUTO
+set_global_assignment -name SYSTEMVERILOG_FILE std/ui.sv -library std
+set_global_assignment -name SYSTEMVERILOG_FILE temp/core.sv
+set_global_assignment -name SYSTEMVERILOG_FILE std/utils.sv -library std
+set_global_assignment -name SYSTEMVERILOG_FILE std/io.sv -library std
+set_global_assignment -name SYSTEMVERILOG_FILE main.sv
+set_global_assignment -name SYSTEMVERILOG_FILE core/RF.sv
+set_global_assignment -name SYSTEMVERILOG_FILE core/ALU.sv
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
