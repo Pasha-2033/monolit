@@ -77,9 +77,12 @@ always @(posedge clk) begin
 end
 endmodule
 module fast_cash #(
-	
+	parameter address_size,
+	parameter data_size,
+	parameter cash_length
 ) (
 	
 );
-	
+reg [address_size + data_size - 1:0][cash_length - 1:0] raw_memory;
+
 endmodule
