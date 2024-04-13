@@ -93,3 +93,33 @@ always @(posedge inner_clk) begin
 	end
 end
 endmodule
+module decoder #(
+	parameter input_width
+) (
+	input wire [input_width - 1:0] select,
+	output wire [2 ** input_width - 1:0] out
+);
+wire [input_width - 1:0] inversed_select = ~select;
+genvar i;
+genvar j;
+generate
+	for (i = 0; i < 2 ** input_width; ++i) begin: decoded_output
+		wire [input_width - 1:0] selection;
+		for (j = 0; j < input_width; ++j) begin: selection_union
+			assign selection[j] = i % (2 ** (j + 1)) >= 2 ** j ? select[j] : inversed_select[j];
+		end
+		assign out[i] = &selection;
+	end
+endgenerate
+endmodule
+module decoder_c #(
+	parameter input_width
+) (
+	input wire enable,
+	input wire [input_width - 1:0] select,
+	output wire [2 ** input_width - 1:0] out
+);
+wire [2 ** input_width - 1:0] raw_decoded;
+decoder #(.input_width(input_width)) dec (.select(select), .out(raw_decoded));
+assign out = raw_decoded & {2 ** input_width{enable}};
+endmodule

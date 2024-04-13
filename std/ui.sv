@@ -14,7 +14,6 @@
 	for (int _i = 0; _i < SIZE; _i += WIDTH) begin			\
 		$display("%s", MEM[(_i + WIDTH) * 8 - 1:_i * 8]);	\
 	end
-//to do (should copy memory, not modify it)
 `define _DISPLAY_A8(WIDTH, MEM, SIZE)				\
 	for (int _i = 0; _i < SIZE; _i += WIDTH) begin	\
 	string _s = MEM[(_i + WIDTH) * 8 - 1:_i * 8];	\

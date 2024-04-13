@@ -61,6 +61,7 @@ set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name SYNCHRONIZER_IDENTIFICATION AUTO
+set_global_assignment -name SYSTEMVERILOG_FILE std/memory.sv -library std
 set_global_assignment -name SYSTEMVERILOG_FILE std/ui.sv -library std
 set_global_assignment -name SYSTEMVERILOG_FILE temp/core.sv
 set_global_assignment -name SYSTEMVERILOG_FILE std/utils.sv -library std
