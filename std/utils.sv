@@ -78,13 +78,13 @@ module counter_c #(
 	input	wire					load,
 	input	wire					reset,
 	input	wire [word_width - 1:0]	D_IN,
-	output	reg  [word_width - 1:0]	D_OUT
+	output	reg  [word_width - 1:0]	D_OUT,
+	output	wire					will_overflow
 );
-wire [word_width - 1:0] count_flow;
-wire [word_width - 1:0] load_flow;
+wire [word_width - 1:0] load_flow = {load_flow[word_width - 2:0] & ~D_OUT[word_width - 2:0], count & load};
+wire [word_width - 1:0] count_flow = {count_flow[word_width - 2:0] & D_OUT[word_width - 2:0], ~load_flow[0]};
 wire inner_clk = clk & (count | load);
-assign load_flow = {load_flow[word_width - 2:0] & ~D_OUT[word_width - 2:0], count & load};
-assign count_flow = {count_flow[word_width - 2:0] & D_OUT[word_width - 2:0], ~load_flow[0]};
+assign will_overflow = &(load_flow[0] ? ~D_OUT : D_OUT);
 always @(posedge inner_clk) begin
 	if (reset) begin
 		D_OUT <= '0;
@@ -93,17 +93,62 @@ always @(posedge inner_clk) begin
 	end
 end
 endmodule
-module decoder #(
-	parameter input_width
+module counter_cs_forward #(
+	parameter word_width = 8
 ) (
-	input wire [input_width - 1:0] select,
-	output wire [2 ** input_width - 1:0] out
+	input	wire					clk,
+	input	wire					action,
+	input	wire					reset,
+	input	wire [word_width - 1:0]	D_IN,
+	output	reg  [word_width - 1:0]	D_OUT,
+	output	wire					will_overflow
 );
+//action 0 - count, 1 - load
+wire [word_width - 2:0] count_flow = {count_flow[word_width - 3:0] & D_OUT[word_width - 2:1], D_OUT[0]};
+assign will_overflow = &D_OUT & ~action;
+always @(posedge clk) begin
+	if (reset) begin
+		D_OUT <= '0;
+	end else begin
+		D_OUT <= action ? D_IN : {D_OUT[word_width - 1:1] ^ count_flow, ~D_OUT[0]};
+	end
+end
+endmodule
+module counter_cs_backward #(
+	parameter word_width = 8
+) (
+	input	wire					clk,
+	input	wire					action,
+	input	wire					reset,
+	input	wire [word_width - 1:0]	D_IN,
+	output	reg  [word_width - 1:0]	D_OUT,
+	output	wire					will_overflow
+);
+//action 0 - count, 1 - load
+wire [word_width - 2:0] load_flow = {load_flow[word_width - 3:0] | D_OUT[word_width - 2:1], D_OUT[0]};
+assign will_overflow = ~(|D_OUT | action);
+always @(posedge clk) begin
+	if (reset) begin
+		D_OUT <= '0;
+	end else begin
+		D_OUT <= action ? D_IN : {D_OUT[word_width - 1:1] ^ ~load_flow, ~D_OUT[0]};
+	end
+end
+endmodule
+//NOTE: it supports non 2^n outputs, so it won`t overgenerate
+//WARNING: DO NOT SET output_width = 1
+module decoder #(
+	parameter output_width
+) (
+	input	wire [$clog2(output_width) - 1:0] select,
+	output	wire [output_width - 1:0] out
+);
+localparam input_width = $clog2(output_width);
 wire [input_width - 1:0] inversed_select = ~select;
 genvar i;
 genvar j;
 generate
-	for (i = 0; i < 2 ** input_width; ++i) begin: decoded_output
+	for (i = 0; i < output_width; ++i) begin: decoded_output
 		wire [input_width - 1:0] selection;
 		for (j = 0; j < input_width; ++j) begin: selection_union
 			assign selection[j] = i % (2 ** (j + 1)) >= 2 ** j ? select[j] : inversed_select[j];
@@ -113,13 +158,28 @@ generate
 endgenerate
 endmodule
 module decoder_c #(
-	parameter input_width
+	parameter output_width
 ) (
-	input wire enable,
-	input wire [input_width - 1:0] select,
-	output wire [2 ** input_width - 1:0] out
+	input	wire enable,
+	input	wire [$clog2(output_width) - 1:0] select,
+	output	wire [output_width - 1:0] out
 );
-wire [2 ** input_width - 1:0] raw_decoded;
-decoder #(.input_width(input_width)) dec (.select(select), .out(raw_decoded));
-assign out = raw_decoded & {2 ** input_width{enable}};
+wire [output_width - 1:0] raw_decoded;
+decoder #(.output_width(output_width)) dec (.select(select), .out(raw_decoded));
+assign out = raw_decoded & {output_width{enable}};
+endmodule
+module tri_state_buffer #(
+	parameter input_width,
+	parameter input_length
+) (
+	input	wire [input_length - 1:0][input_width - 1:0] in,
+	input	wire [input_length - 1:0] en,
+	output	wire [input_width - 1:0] out
+);
+genvar i;
+generate
+	for (i = 0; i < input_length; ++i) begin: buffer_unit
+		assign out = en[i] ? in[i] : 'z;
+	end
+endgenerate
 endmodule

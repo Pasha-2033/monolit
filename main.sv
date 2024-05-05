@@ -31,12 +31,33 @@ UART_N #(.clk_reduction(64), .word_width(8)) uart_n (
 counter_c #(.word_width(8)) cc (
 	.clk(clk)
 );
+counter_cs_forward #(.word_width(8)) ccsf (
+	.clk(clk)
+);
+counter_cs_backward #(.word_width(8)) ccsb (
+	.clk(clk)
+);
 //cash
 _fbsoc_string_container #(.address_size(4), .data_size(4), .cash_length(16)) str_con (
 	.clk(clk),
 	.write(D_IN[0]),
-	.index(D_IN[3:1]),
-	.D_IN(D_IN[7:4]),
+	.index(D_IN[4:1]),
+	.D_IN(D_IN[8:5]),
 	.D_OUT(D_OUT[28:25])
+);
+
+
+
+_fuc_ll_container_scalar #(.address_size(4), .data_size(4), .cash_length(16)) fuc_s (
+	.clk(clk),
+	.action(D_IN[0]),
+	.address(D_IN[4:1]),
+	.data(D_IN[28:25])
+);
+fast_unordered_cash #(.address_size(4), .data_size(4), .cash_length(16), .call_time_size(4)) fuc (
+	.clk(clk),
+	.action(D_IN[0]),
+	.address(D_IN[4:1]),
+	.data(D_IN[8:5])
 );
 endmodule
