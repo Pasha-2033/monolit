@@ -48,7 +48,7 @@ _fbsoc_string_container #(.address_size(4), .data_size(4), .cash_length(16)) str
 
 
 
-_fuc_ll_container_scalar #(.address_size(4), .data_size(4), .cash_length(16)) fuc_s (
+_fuc_ll_container #(.address_size(4), .data_size(4), .cash_length(16)) fuc_s (
 	.clk(clk),
 	.action(D_IN[0]),
 	.address(D_IN[4:1]),

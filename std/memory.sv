@@ -200,7 +200,7 @@ data can have inner flags for more complex state machines, it`s all up to you, o
 flag of `emptiness` (0) signals that this unit is more prioritized for load than others with a flag (1)
 special behavior:
 port clk will signal to make action
-port action will signal to load (1) or unload (0)
+port action will signal to load (0) or unload (1)
 */
 module _fuc_string #(
 	parameter address_size,
@@ -216,21 +216,21 @@ module _fuc_string #(
 assign equal = ~|(str[address_size + data_size - 1:data_size] ^ address);
 always @(posedge clk) begin
 	if (action) begin
-		str = {1'b1, address, data};
-	end else begin
 		str[address_size + data_size] = '0;
+	end else begin
+		str = {1'b1, address, data};
 	end
 end
 endmodule
 /*
 special behavior:
 port clk will signal to make action
-port action will signal to load (1) or unload (0)
+port action will signal to load (0) or unload (1)
 unloading empty or selected nonexistant units (has_unit = 0) will cause no effects
 loading new string with full container (has_unit = 0 & has_empty_unit = 0) will cause no effects
 action is applied by selection (has_unit = 1) or loading new string into empty one (has_empty_unit = 1) due index priority 0 -> cash_length - 1
 */
-module _fuc_ll_container_scalar #(
+module _fuc_ll_container #(
 	parameter address_size,
 	parameter data_size,
 	parameter cash_length
@@ -239,6 +239,8 @@ module _fuc_ll_container_scalar #(
 	input	wire											action,
 	input	wire [address_size - 1:0]						address,
 	input	wire [data_size - 1:0]							data,
+	output	wire [cash_length - 1:0]						units_equal,	//for high level containers with state machine (optional)
+	output	wire [cash_length - 1:0]						units_flag,		//for high level containers with state machine (optional)
 	output	wire [cash_length - 1:0][address_size - 1:0]	units_address,	//for high level containers with state machine (optional)
 	output	wire [cash_length - 1:0][data_size - 1:0]		units_data,		//for high level containers with state machine (optional)
 	output	wire											unit_empty,
@@ -247,9 +249,6 @@ module _fuc_ll_container_scalar #(
 	output	wire [address_size - 1:0]						sel_address,
 	output	wire [data_size - 1:0]							sel_data									
 );
-//action 0 - unload, 1 - load
-wire [cash_length - 1:0] units_flag;
-wire [cash_length - 1:0] units_equal;
 wire [cash_length - 1:0] units_load_unloaded = {units_load_unloaded[cash_length - 2:0] | units_flag[cash_length - 1:1], units_flag[0]};
 assign unit_empty = |(units_flag & units_equal);
 assign has_unit = |units_equal;
@@ -278,6 +277,30 @@ tri_state_buffer #(.input_width(data_size), .input_length(cash_length)) data_buf
 	sel_data
 );
 endmodule
+module _fuc_ll_timer #(
+	parameter cash_length,
+	parameter call_time_size
+) (
+	input	wire											clk,
+	input	wire [cash_length - 1:0] 						units_equal,
+	input	wire											load,
+	output	wire [cash_length - 1:0][call_time_size - 1:0]	units_time,
+	output	wire [cash_length - 1:0]						units_time_will_overflow	//for high level containers with state machine (optional)
+);
+genvar i;
+generate
+	for (i = 0; i < cash_length; ++i) begin: time_unit
+		counter_cs_forward #(.word_width(call_time_size)) iterator (
+			.clk(clk & ~units_time_will_overflow[i]),
+			.action(units_equal[i] & load),
+			.reset('0),
+			.D_IN('1),
+			.D_OUT(units_time[i]),
+			.will_overflow(units_time_will_overflow[i])
+		);
+	end
+endgenerate
+endmodule
 module fast_unordered_cash #(
 	parameter address_size,
 	parameter data_size,
@@ -297,15 +320,15 @@ module fast_unordered_cash #(
 	
 );
 //action 0 - read, 1 - write
+wire [cash_length - 1:0] units_equal;
 wire [cash_length - 1:0][address_size - 1:0] units_address;
 wire [cash_length - 1:0][data_size - 1:0] units_data;
 wire [cash_length - 1:0][call_time_size - 1:0] units_time;
+wire [$clog2(cash_length) - 1:0] iterator_value;
 wire unit_empty;
 wire has_unit;
 wire has_empty_unit;
 wire counter_will_overflow;
-wire [call_time_size- 1:0] sel_time;
-wire [$clog2(cash_length) - 1:0] iterator_value;
 assign request_string = (state == FETCH);
 assign ready = (state == IDLE) & has_unit;
 counter_cs_forward #(.word_width($clog2(cash_length))) iterator (
@@ -316,18 +339,25 @@ counter_cs_forward #(.word_width($clog2(cash_length))) iterator (
 	.D_OUT(iterator_value),
 	.will_overflow(counter_will_overflow)
 );
-_fuc_ll_container_scalar #(.address_size(address_size), .data_size(data_size + call_time_size), .cash_length(cash_length)) ll_memory (
+_fuc_ll_timer #(.cash_length(cash_length), .call_time_size(call_time_size)) ll_timer (
+	.clk(clk),
+	.units_equal(units_equal),
+	.load(state == IDLE),
+	.units_time(units_time)
+);
+_fuc_ll_container #(.address_size(address_size), .data_size(data_size), .cash_length(cash_length)) ll_memory (
 	.clk(((state == UNLOAD) & unloaded_data_handled) | (request_string & fetch_data_presented) | ready),
-	.action(request_string | (state == IDLE)),
+	.action(state == UNLOAD),
 	.address(state == UNLOAD ? max_time_address : address),
-	.data({state == IDLE ? sel_time + 1 : 0, data}),
+	.data(action ? sel_data : data),
+	.units_equal(units_equal),
 	.units_address(units_address),
-	.units_data({units_time, units_data}),
+	.units_data(units_data),
 	.unit_empty(unit_empty),
 	.has_unit(has_unit),
 	.has_empty_unit(has_empty_unit),
 	.sel_address(sel_address),
-	.sel_data({sel_time, sel_data})
+	.sel_data(sel_data)
 );
 enum reg [1:0] {IDLE, PLACE_SEARCH, UNLOAD, FETCH} state = IDLE;
 reg [address_size - 1:0] max_time_address;
@@ -338,15 +368,16 @@ always @(posedge clk) begin
 		IDLE: begin
 			if (~has_unit) begin
 				state <= has_empty_unit ? FETCH : PLACE_SEARCH;
-				max_time_address <= units_address[0];
-				max_time_value <= units_time[0];
+				
 			end
 		end
 		PLACE_SEARCH: begin
-			if (counter_will_overflow) begin
+			//NOTE: ~|max_time_value is made for speed up - there is no need to find more unused unit than most unused
+			if (~|max_time_value | counter_will_overflow) begin
 				state <= UNLOAD;
 			end
-			if (max_time_value > units_time[iterator_value]) begin
+			//NOTE: there is '<' because the more time is the more unit is used
+			if (max_time_value < units_time[iterator_value]) begin
 				max_time_address <= units_address[iterator_value];
 				max_time_value <= units_time[iterator_value];
 			end
