@@ -292,7 +292,7 @@ generate
 	for (i = 0; i < cash_length; ++i) begin: time_unit
 		counter_cs_forward #(.word_width(call_time_size)) iterator (
 			.clk(clk & ~units_time_will_overflow[i]),
-			.action(~units_equal[i] & load),
+			.action(units_equal[i] & load),
 			.reset('0),
 			.D_IN('1),
 			.D_OUT(units_time[i]),
