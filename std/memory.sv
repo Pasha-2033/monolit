@@ -290,7 +290,7 @@ module _fuc_ll_timer #(
 genvar i;
 generate
 	for (i = 0; i < cash_length; ++i) begin: time_unit
-		counter_cs_forward #(.word_width(call_time_size)) iterator (
+		counter_cs_backward #(.word_width(call_time_size)) iterator (
 			.clk(clk & ~units_time_will_overflow[i]),
 			.action(units_equal[i] & load),
 			.reset('0),
@@ -317,7 +317,6 @@ module fast_unordered_cash #(
 	output	wire											ready,		//for reader
 	output	wire [address_size - 1:0]						sel_address,
 	output	wire [data_size - 1:0]							sel_data
-	
 );
 //action 0 - read, 1 - write
 wire [cash_length - 1:0] units_equal;

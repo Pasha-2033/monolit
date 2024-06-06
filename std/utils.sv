@@ -1,3 +1,5 @@
+`define min(a, b) ((a) > (b) ? (b) : (a))
+`define max(a, b) ((a) > (b) ? (a) : (b))
 module bit_reverse #(
 	parameter bit_width = 4
 )(
@@ -167,6 +169,36 @@ module decoder_c #(
 wire [output_width - 1:0] raw_decoded;
 decoder #(.output_width(output_width)) dec (.select(select), .out(raw_decoded));
 assign out = raw_decoded & {output_width{enable}};
+endmodule
+//NOTE: it supports non 2^n inputs, so it won`t overgenerate
+//WARNING: DO NOT SET input_width = 1
+module encoder #(
+	parameter input_width
+) (
+	input wire [input_width - 1:0] select,
+	output wire	[$clog2(input_width) - 1:0] out
+);
+localparam output_width = $clog2(input_width);
+genvar i;
+genvar j;
+generate
+	for (i = 0; i < output_width; ++i) begin: encoded_output
+		localparam unit_size = 2 ** i;
+		localparam rest_width = input_width % (2 * unit_size);
+		localparam full_width = (input_width - rest_width) / 2;
+		localparam collector_size = full_width + (rest_width > unit_size ? rest_width % unit_size : 0);
+		wire [collector_size - 1:0] collector;
+		for (j = 0; j < collector_size; j += unit_size) begin: selection_union
+			localparam target_start = j * 2 + unit_size;
+			assign collector[`min(collector_size, j + unit_size) - 1:j] = select[`min(input_width, target_start + unit_size) - 1:target_start];
+		end
+		if (collector_size > 1) begin
+			assign out[i] = |collector;
+		end else begin
+			assign out[i] = collector;
+		end
+	end
+endgenerate
 endmodule
 module tri_state_buffer #(
 	parameter input_width,
