@@ -1,4 +1,4 @@
-`define UART_ONESTOPBIT		2'h0
+`define UART_ONESTOPBIT		2'h0	//TODO (replace to enum)
 `define UART_ONE5STOPBITS	2'h1
 `define UART_TWOSTOPBITS	2'h2
 `define UART_NOPARITY		3'h0

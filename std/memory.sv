@@ -90,7 +90,11 @@ localparam size = address_size + data_size;
 //NOTE: its unsufficient to use this complex container for small ammount of memory
 //NOTE: address is recognised as order forming data, any metadata may cause problems, use it in data section
 wire [cash_length - 1:0] reg_selection;
-decoder_c #(.output_width(cash_length)) dec (.enable(write), .select(index), .out(reg_selection));
+decoder_c #(.output_width(cash_length)) dec (
+	.enable(write), 
+	.select(index), 
+	.out(reg_selection)
+);
 reg [3:0][size - 1:0] framing_memory;
 wire [cash_length - 1:0][size - 1:0] all_str;
 assign all_str[1:0] = framing_memory[1:0];
@@ -266,12 +270,12 @@ generate
 		);
 	end
 endgenerate
-tri_state_buffer #(.input_width(address_size), .input_length(cash_length)) address_buffer (
+tri_state_buffer #(.word_width(address_size), .word_length(cash_length)) address_buffer (
 	units_address,
 	units_equal & units_flag,	//units_flag if for preventing same unloaded units connection to same port with different outputs
 	sel_address
 );
-tri_state_buffer #(.input_width(data_size), .input_length(cash_length)) data_buffer (
+tri_state_buffer #(.word_width(data_size), .word_length(cash_length)) data_buffer (
 	units_data,
 	units_equal & units_flag,	//units_flag if for preventing same unloaded units connection to same port with different outputs
 	sel_data

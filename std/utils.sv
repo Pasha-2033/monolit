@@ -72,8 +72,59 @@ generate
 	end
 endgenerate
 endmodule
+typedef enum bit[1:0] {LOGIC, ARITHMETIC, RESERVED, CYCLIC} SHIFT_TYPE;
+module polyshift_r #(
+	parameter word_width
+) (
+	input wire [word_width - 1:0] D_IN,
+	input wire [$clog2(word_width) - 1:0] shift_size,
+	input wire [1:0] shift_type,
+	output wire [word_width - 1:0] D_OUT
+);
+wire [3:0][word_width - 2:0] shift_args = {
+	D_IN[word_width - 2:0],		//CYCLIC,
+	{word_width - 1{1'b0}},		//RESERVED
+	{word_width - 1{D_IN[word_width - 1]}},		//ARITHMETIC
+	{word_width - 1{1'b0}}		//LOGIC
+};
+wire [word_width - 2:0] shift_arg = shift_args[shift_type];
+wire [word_width - 1:0][word_width - 1:0] shift_input;
+assign shift_input[0] = D_IN;
+assign D_OUT = shift_input[shift_size];
+genvar i;
+generate
+	for(i = 1; i < word_width; ++i) begin: input_generation
+		assign shift_input[i] = {shift_arg[i - 1:0], D_IN[word_width - 1:i]};
+	end
+endgenerate
+endmodule
+module polyshift_l #(
+	parameter word_width
+) (
+	input wire [word_width - 1:0] D_IN,
+	input wire [$clog2(word_width) - 1:0] shift_size,
+	input wire [1:0] shift_type,
+	output wire [word_width - 1:0] D_OUT
+);
+wire [3:0][word_width - 2:0] shift_args = {
+	D_IN[word_width - 1:1],		//CYCLIC,
+	{word_width - 1{1'b0}},		//RESERVED
+	{word_width - 1{1'b0}},		//ARITHMETIC (may be put '1??? because it`s looks like LOGIC)
+	{word_width - 1{1'b0}}		//LOGIC
+};
+wire [word_width - 2:0] shift_arg = shift_args[shift_type];
+wire [word_width - 1:0][word_width - 1:0] shift_input;
+assign shift_input[0] = D_IN;
+assign D_OUT = shift_input[shift_size];
+genvar i;
+generate
+	for(i = 1; i < word_width; ++i) begin: input_generation
+		assign shift_input[i] = {D_IN[word_width - i - 1:0], shift_arg[word_width - 2:word_width - i - 1]};
+	end
+endgenerate
+endmodule
 module counter_c #(
-	parameter word_width = 8
+	parameter word_width
 ) (
 	input	wire					clk,
 	input	wire					count,
@@ -96,7 +147,7 @@ always @(posedge inner_clk) begin
 end
 endmodule
 module counter_cs_forward #(
-	parameter word_width = 8
+	parameter word_width
 ) (
 	input	wire					clk,
 	input	wire					action,
@@ -117,7 +168,7 @@ always @(posedge clk) begin
 end
 endmodule
 module counter_cs_backward #(
-	parameter word_width = 8
+	parameter word_width
 ) (
 	input	wire					clk,
 	input	wire					action,
@@ -167,7 +218,10 @@ module decoder_c #(
 	output	wire [output_width - 1:0] out
 );
 wire [output_width - 1:0] raw_decoded;
-decoder #(.output_width(output_width)) dec (.select(select), .out(raw_decoded));
+decoder #(.output_width(output_width)) dec (
+	.select(select),
+	.out(raw_decoded)
+);
 assign out = raw_decoded & {output_width{enable}};
 endmodule
 //NOTE: it supports non 2^n inputs, so it won`t overgenerate
@@ -201,16 +255,16 @@ generate
 endgenerate
 endmodule
 module tri_state_buffer #(
-	parameter input_width,
-	parameter input_length
+	parameter word_width,
+	parameter word_length
 ) (
-	input	wire [input_length - 1:0][input_width - 1:0] in,
-	input	wire [input_length - 1:0] en,
-	output	wire [input_width - 1:0] out
+	input	wire [word_length - 1:0][word_width - 1:0] in,
+	input	wire [word_length - 1:0] en,
+	output	wire [word_width - 1:0] out
 );
 genvar i;
 generate
-	for (i = 0; i < input_length; ++i) begin: buffer_unit
+	for (i = 0; i < word_length; ++i) begin: buffer_unit
 		assign out = en[i] ? in[i] : 'z;
 	end
 endgenerate

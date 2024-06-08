@@ -2,7 +2,7 @@ module main (
 	input wire clk,
 	input wire [31:0] D_IN,
 	output wire [63:0] D_OUT
-);/*
+);
 //Fast adder
 wire P, G, C_OUT, C_IN;
 fast_adder #(.cascade_size(4), .bit_width(16)) fa (
@@ -30,14 +30,21 @@ counter_cs_forward #(.word_width(8)) ccsf (
 );
 counter_cs_backward #(.word_width(8)) ccsb (
 	.clk(clk)
-);*/
+);
 //encoder
 encoder #(.input_width(5)) enc (
 	.select(D_IN[4:0])
 );
 encoder #(.input_width(17)) enc2 (
 	.select(D_IN[16:0])
-);/*
+);
+//shifts
+polyshift_l #(.word_width(8)) psl (
+	.D_IN(D_IN[7:0])
+);
+polyshift_r #(.word_width(8)) psr (
+	.D_IN(D_IN[7:0])
+);
 //cash
 _fbsoc_string_container #(.address_size(4), .data_size(4), .cash_length(16)) str_con (
 	.clk(clk),
@@ -60,5 +67,5 @@ fast_unordered_cash #(.address_size(4), .data_size(4), .cash_length(16), .call_t
 	.action(D_IN[0]),
 	.address(D_IN[4:1]),
 	.data(D_IN[8:5])
-);*/
+);
 endmodule
