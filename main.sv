@@ -39,11 +39,18 @@ encoder #(.input_width(17)) enc2 (
 	.select(D_IN[16:0])
 );
 //shifts
+wire [7:0] D = D_IN[7:0];
 polyshift_l #(.word_width(8)) psl (
-	.D_IN(D_IN[7:0])
+	.C_IN(`RCL(D, D_IN[13])),
+	.D_IN(D),
+	.shift_size(D_IN[10:8]),
+	.shift_type(D_IN[12:11])
 );
 polyshift_r #(.word_width(8)) psr (
-	.D_IN(D_IN[7:0])
+	.C_IN(`RCR(D, D_IN[13])),
+	.D_IN(D),
+	.shift_size(D_IN[10:8]),
+	.shift_type(D_IN[12:11])
 );
 //cash
 _fbsoc_string_container #(.address_size(4), .data_size(4), .cash_length(16)) str_con (

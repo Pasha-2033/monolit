@@ -41,9 +41,9 @@ generate
 		for(i = 0; i < cascade_size; ++i) begin: adder_cascade
 			fast_adder #(.cascade_size(cascade_size), .bit_width(cascade_num)) child_fast_adder (
 				.C_IN(C[i]),
-				.A(A[(i + 1) * cascade_num - 1:i * cascade_num]),
-				.B(B[(i + 1) * cascade_num - 1:i * cascade_num]),
-				.R(R[(i + 1) * cascade_num - 1:i * cascade_num]),
+				.A(A[i * cascade_num+:cascade_num]),
+				.B(B[i * cascade_num+:cascade_num]),
+				.R(R[i * cascade_num+:cascade_num]),
 				.P(PP[i]),
 				.G(PG[i])
 			);
@@ -72,20 +72,24 @@ generate
 	end
 endgenerate
 endmodule
-typedef enum bit[1:0] {LOGIC, ARITHMETIC, RESERVED, CYCLIC} SHIFT_TYPE;
+//CARRY is a special case of DOUBLE_PECISION
+typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PECISION, CYCLIC} SHIFT_TYPE;
+//WARNING: DO NOT SET $size(C_IN) > 1
+`define RCR(D_IN, C_IN) {D_IN[$size(D_IN) - 2:1], C_IN}
 module polyshift_r #(
 	parameter word_width
 ) (
+	input wire [word_width - 2:0] C_IN,
 	input wire [word_width - 1:0] D_IN,
 	input wire [$clog2(word_width) - 1:0] shift_size,
 	input wire [1:0] shift_type,
 	output wire [word_width - 1:0] D_OUT
 );
 wire [3:0][word_width - 2:0] shift_args = {
-	D_IN[word_width - 2:0],		//CYCLIC,
-	{word_width - 1{1'b0}},		//RESERVED
+	D_IN[word_width - 2:0],						//CYCLIC,
+	C_IN,										//DOUBLE_PECISION
 	{word_width - 1{D_IN[word_width - 1]}},		//ARITHMETIC
-	{word_width - 1{1'b0}}		//LOGIC
+	{word_width - 1{1'b0}}						//LOGIC
 };
 wire [word_width - 2:0] shift_arg = shift_args[shift_type];
 wire [word_width - 1:0][word_width - 1:0] shift_input;
@@ -98,9 +102,11 @@ generate
 	end
 endgenerate
 endmodule
+`define RCL(D_IN, C_IN) {C_IN, D_IN[$size(D_IN) - 2:1]}
 module polyshift_l #(
 	parameter word_width
 ) (
+	input wire [word_width - 2:0] C_IN,
 	input wire [word_width - 1:0] D_IN,
 	input wire [$clog2(word_width) - 1:0] shift_size,
 	input wire [1:0] shift_type,
@@ -108,7 +114,7 @@ module polyshift_l #(
 );
 wire [3:0][word_width - 2:0] shift_args = {
 	D_IN[word_width - 1:1],		//CYCLIC,
-	{word_width - 1{1'b0}},		//RESERVED
+	C_IN,						//DOUBLE_PECISION
 	{word_width - 1{1'b0}},		//ARITHMETIC (may be put '1??? because it`s looks like LOGIC)
 	{word_width - 1{1'b0}}		//LOGIC
 };
