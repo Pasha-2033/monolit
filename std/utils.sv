@@ -248,7 +248,7 @@ generate
 		localparam full_width = (input_width - rest_width) / 2;
 		localparam collector_size = full_width + (rest_width > unit_size ? rest_width % unit_size : 0);
 		wire [collector_size - 1:0] collector;
-		for (j = 0; j < collector_size; j += unit_size) begin: selection_union
+		for (j = 0; j < collector_size; j = j + unit_size) begin: selection_union
 			localparam target_start = j * 2 + unit_size;
 			assign collector[`min(collector_size, j + unit_size) - 1:j] = select[`min(input_width, target_start + unit_size) - 1:target_start];
 		end
