@@ -1,31 +1,31 @@
 `define min(a, b) ((a) > (b) ? (b) : (a))
 `define max(a, b) ((a) > (b) ? (a) : (b))
 module bit_reverse #(
-	parameter bit_width = 4
+	parameter word_width
 )(
-	input	wire [bit_width - 1:0] in,
-	output	wire [bit_width - 1:0] out
+	input	wire [word_width - 1:0] in,
+	output	wire [word_width - 1:0] out
 );
 genvar i;
 generate
-	for(i = 0; i < bit_width; ++i) begin: reverse
-		assign out[i] = in[bit_width - i - 1];
+	for(i = 0; i < word_width; ++i) begin: reverse
+		assign out[i] = in[word_width - i - 1];
 	end
 endgenerate
 endmodule
 module fast_adder #(
 	parameter cascade_size = 4,
-	parameter bit_width = 4
+	parameter word_width = 4
 ) (
 	input	wire					C_IN,
-	input	wire [bit_width - 1:0]	A,
-	input	wire [bit_width - 1:0]	B,
-	output	wire [bit_width - 1:0]	R,
+	input	wire [word_width - 1:0]	A,
+	input	wire [word_width - 1:0]	B,
+	output	wire [word_width - 1:0]	R,
 	output	wire					P,
 	output	wire					G,
 	output	wire					C_OUT
 );
-localparam cascade_num = bit_width / cascade_size;
+localparam cascade_num = word_width / cascade_size;
 wire [cascade_size - 1:0] PP;
 wire [cascade_size - 1:0] PG;
 wire [cascade_size - 1:0] GG;
@@ -39,7 +39,7 @@ genvar j;
 generate
 	if (cascade_num > 1) begin
 		for(i = 0; i < cascade_size; ++i) begin: adder_cascade
-			fast_adder #(.cascade_size(cascade_size), .bit_width(cascade_num)) child_fast_adder (
+			fast_adder #(.cascade_size(cascade_size), .word_width(cascade_num)) child_fast_adder (
 				.C_IN(C[i]),
 				.A(A[i * cascade_num+:cascade_num]),
 				.B(B[i * cascade_num+:cascade_num]),

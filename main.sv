@@ -1,18 +1,14 @@
 module main (
 	input wire clk,
 	input wire [31:0] D_IN,
-	output wire [63:0] D_OUT
+	output wire [2 ** 12 - 1:0] D_OUT
 );
 //Fast adder
 wire P, G, C_OUT, C_IN;
-fast_adder #(.cascade_size(4), .bit_width(16)) fa (
-	C_IN, 
-	D_IN[15:0], 
-	D_IN[31:16], 
-	D_OUT[15:0], 
-	P, 
-	G, 
-	C_OUT
+fast_adder #(.cascade_size(4), .word_width(16)) fa (
+	.C_IN(C_IN), 
+	.A(D_IN[15:0]), 
+	.B(D_IN[31:16])
 );
 //UART
 wire RX, TX;
@@ -30,6 +26,11 @@ counter_cs_forward #(.word_width(8)) ccsf (
 );
 counter_cs_backward #(.word_width(8)) ccsb (
 	.clk(clk)
+);
+//decoder
+decoder #(.output_width(2 ** 12)) dec (
+	.select(D_IN[12:0]),
+	.out(D_OUT)
 );
 //encoder
 encoder #(.input_width(5)) enc (
@@ -57,8 +58,7 @@ _fbsoc_string_container #(.address_size(4), .data_size(4), .cash_length(16)) str
 	.clk(clk),
 	.write(D_IN[0]),
 	.index(D_IN[4:1]),
-	.D_IN(D_IN[8:5]),
-	.D_OUT(D_OUT[28:25])
+	.D_IN(D_IN[8:5])
 );
 
 

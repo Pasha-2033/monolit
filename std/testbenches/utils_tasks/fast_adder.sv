@@ -1,12 +1,13 @@
 module task_fast_adder #(
 	parameter cascade_size,
-	parameter bit_width
+	parameter word_width
 );
-logic [bit_width - 1:0] A;
-logic [bit_width - 1:0] B;
-wire [bit_width - 1:0] R;
+integer errors;
+logic [word_width - 1:0] A;
+logic [word_width - 1:0] B;
+wire [word_width - 1:0] R;
 wire C_OUT;
-fast_adder #(.cascade_size(cascade_size), .bit_width(bit_width)) fa (
+fast_adder #(.cascade_size(cascade_size), .word_width(word_width)) fa (
 	.C_IN('0),
 	.A(A),
 	.B(B),
@@ -14,21 +15,12 @@ fast_adder #(.cascade_size(cascade_size), .bit_width(bit_width)) fa (
 	//ingore technical outupts P & G
 	.C_OUT(C_OUT)
 );
-task run();
-	//TODO: expand and make more infrormative
+task run(input [word_width - 1:0] A_VAL, input [word_width - 1:0] B_VAL);
 	begin		
-		A = 10;
-		B = 20;
+		A = A_VAL;
+		B = B_VAL;
 		#10
-		$display("%s\tEXPECTED: %b\tGOT: %b", R == (A + B) ? "OK  " : "FAIL", A + B, R);
-		A = 0;
-		B = -1;
-		#10
-		$display("%s\tEXPECTED: %b\tGOT: %b", R == (A + B) ? "OK  " : "FAIL", A + B, R);
-		A = 1;
-		B = -1;
-		#10
-		$display("%s\tEXPECTED: %b\tGOT: %b", R == (A + B) ? "OK  " : "FAIL", A + B, R);
+		$display("%s\tEXPECTED: %b(%d)\tGOT: %b(%d)\tA: %b(%d)\tB: %b(%d)", R == (A + B) ? "OK  " : "FAIL", A + B, A + B, R, R, A, A, B, B);
 	end
 endtask
 endmodule
