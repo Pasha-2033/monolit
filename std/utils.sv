@@ -106,8 +106,8 @@ generate
 	end
 endgenerate
 endmodule
-//CARRY is a special case of DOUBLE_PECISION
-typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PECISION, CYCLIC} SHIFT_TYPE;
+//CARRY is a special case of DOUBLE_PRECISION
+typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
 //WARNING: DO NOT SET $size(C_IN) != 1
 `define RCR(D_IN, C_IN) {D_IN[$size(D_IN) - 2:1], C_IN}
 /*
@@ -115,7 +115,7 @@ Provides all right shifts.
 Parameters:
 	word_width	- width of operand and result
 Ports:
-	C_IN		- placing bits (for DOUBLE_PECISION)
+	C_IN		- placing bits (for DOUBLE_PRECISION)
 	D_IN		- word to shift
 	shift_size	- number of bits to shift
 	shift_type	- type of shift (see SHIFT_TYPE)
@@ -136,7 +136,7 @@ module polyshift_r #(
 );
 wire [3:0][word_width - 2:0] shift_args = {
 	D_IN[word_width - 2:0],						//CYCLIC,
-	C_IN,										//DOUBLE_PECISION
+	C_IN,										//DOUBLE_PRECISION
 	{word_width - 1{D_IN[word_width - 1]}},		//ARITHMETIC
 	{word_width - 1{1'b0}}						//LOGIC
 };
@@ -158,7 +158,7 @@ Provides all left shifts.
 Parameters:
 	word_width	- width of operand and result
 Ports:
-	C_IN		- placing bits (for DOUBLE_PECISION)
+	C_IN		- placing bits (for DOUBLE_PRECISION)
 	D_IN		- word to shift
 	shift_size	- number of bits to shift
 	shift_type	- type of shift (see SHIFT_TYPE)
@@ -179,7 +179,7 @@ module polyshift_l #(
 );
 wire [3:0][word_width - 2:0] shift_args = {
 	D_IN[word_width - 1:1],		//CYCLIC,
-	C_IN,						//DOUBLE_PECISION
+	C_IN,						//DOUBLE_PRECISION
 	{word_width - 1{1'b0}},		//ARITHMETIC (may be put '1??? because it`s looks like LOGIC)
 	{word_width - 1{1'b0}}		//LOGIC
 };
