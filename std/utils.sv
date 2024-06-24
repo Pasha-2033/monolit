@@ -1,5 +1,15 @@
 `define min(a, b) ((a) > (b) ? (b) : (a))
 `define max(a, b) ((a) > (b) ? (a) : (b))
+/*
+Will reverse word bitwise (DCBA->ABCD).
+Parameters:
+	word_width - width of input and output word
+Ports:
+	in	- word to reverse
+	out	- reversed word
+Generation:
+	assign junior bits to senior ones and senior bits to junior ones
+*/
 module bit_reverse #(
 	parameter word_width
 )(
@@ -13,6 +23,27 @@ generate
 	end
 endgenerate
 endmodule
+/*
+Will create carry-lookahead adder (faster addition operation).
+Parameters:
+	word_width		- width of operands and result
+	cascade_size	- number of fast adders in lower level
+Local parameters:
+	cascade_num	- word_width of lower level fast adders
+Ports:
+	C_IN	- carry input
+	A		- A operand
+	B		- B operand
+	R		- result
+	P		- propagation
+	G		- generation
+	C_OUT	- cary output
+Generation:
+	fast_adder is recusrsive module
+	if word_width > cascade_size then lookahead and lower level is generated
+	else ripple-carry adder is generated
+	lower level is smaller fast adders
+*/
 module fast_adder #(
 	parameter cascade_size = 4,
 	parameter word_width = 4
@@ -38,6 +69,7 @@ genvar i;
 genvar j;
 generate
 	if (cascade_num > 1) begin
+		//creating lowest level
 		for(i = 0; i < cascade_size; ++i) begin: adder_cascade
 			fast_adder #(.cascade_size(cascade_size), .word_width(cascade_num)) child_fast_adder (
 				.C_IN(C[i]),
@@ -49,13 +81,15 @@ generate
 			);
 		end
 	end else begin
+		//lowest level implementation
 		for(i = 0; i < cascade_size; ++i) begin: bit_cascade
-			//can be optimised by component num
+			//can be optimised by component num (TODO?)
 			assign R[i] = A[i] ^ B[i] ^ C[i];
 			assign PP[i] = A[i] | B[i];
 			assign PG[i] = A[i] & B[i];
 		end
 	end
+	//lookahead implementation
 	for(i = 0; i < cascade_size; ++i) begin: signal_cascade
 		if (i == cascade_size - 1) begin
 			assign GG[i] = PG[i];
@@ -74,8 +108,23 @@ endgenerate
 endmodule
 //CARRY is a special case of DOUBLE_PECISION
 typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PECISION, CYCLIC} SHIFT_TYPE;
-//WARNING: DO NOT SET $size(C_IN) > 1
+//WARNING: DO NOT SET $size(C_IN) != 1
 `define RCR(D_IN, C_IN) {D_IN[$size(D_IN) - 2:1], C_IN}
+/*
+Provides all right shifts.
+Parameters:
+	word_width	- width of operand and result
+Ports:
+	C_IN		- placing bits (for DOUBLE_PECISION)
+	D_IN		- word to shift
+	shift_size	- number of bits to shift
+	shift_type	- type of shift (see SHIFT_TYPE)
+	D_OUT		- shifted word
+Generation:
+	scheme contains mode multiplexer and shift multiplexer
+	first one is placing bits selection (according to shift_type)
+	second one is selection of shift size (all shifted words are generated and used for selection)
+*/
 module polyshift_r #(
 	parameter word_width
 ) (
@@ -102,7 +151,23 @@ generate
 	end
 endgenerate
 endmodule
+//WARNING: DO NOT SET $size(D_IN) != word_width parameter in polyshift_l
 `define RCL(D_IN, C_IN) {C_IN, D_IN[$size(D_IN) - 2:1]}
+/*
+Provides all left shifts.
+Parameters:
+	word_width	- width of operand and result
+Ports:
+	C_IN		- placing bits (for DOUBLE_PECISION)
+	D_IN		- word to shift
+	shift_size	- number of bits to shift
+	shift_type	- type of shift (see SHIFT_TYPE)
+	D_OUT		- shifted word
+Generation:
+	scheme contains mode multiplexer and shift multiplexer
+	first one is placing bits selection (according to shift_type)
+	second one is selection of shift size (all shifted words are generated and used for selection)
+*/
 module polyshift_l #(
 	parameter word_width
 ) (
@@ -129,6 +194,24 @@ generate
 	end
 endgenerate
 endmodule
+/*
+Provides counter with builded in adder and subtractor.
+Parameters:
+	word_width	- width of counter value and value for loading
+Ports:
+	clk				- clock
+	count			- enable counting
+	load			- enable loading
+	reset			- reset asynchronously
+	D_IN			- data for loading
+	D_OUT			- counter value
+	will_overflow	- shows if next count will be with overflow
+Generation:
+	count = 0 & load = 0 - do nothing
+	count = 0 & load = 1 - load
+	count = 1 & load = 0 - count up
+	count = 1 & load = 1 - count down
+*/
 module counter_c #(
 	parameter word_width
 ) (
@@ -142,16 +225,30 @@ module counter_c #(
 );
 wire [word_width - 1:0] load_flow = {load_flow[word_width - 2:0] & ~D_OUT[word_width - 2:0], count & load};
 wire [word_width - 1:0] count_flow = {count_flow[word_width - 2:0] & D_OUT[word_width - 2:0], ~load_flow[0]};
-wire inner_clk = clk & (count | load);
 assign will_overflow = &(load_flow[0] ? ~D_OUT : D_OUT);
-always @(posedge inner_clk) begin
+always @(posedge clk or posedge reset) begin
 	if (reset) begin
 		D_OUT <= '0;
-	end else begin
+	end else if (count | load) begin
 		D_OUT <= ~count & load ? D_IN : {D_OUT[word_width - 1:1] ^ (count_flow[word_width - 1:1] | load_flow[word_width - 1:1]), ~D_OUT[0]};
 	end
 end
 endmodule
+/*
+Provides counter with builded in adder.
+Parameters:
+	word_width	- width of counter value and value for loading
+Ports:
+	clk				- clock
+	action			- select action type
+	reset			- reset asynchronously
+	D_IN			- data for loading
+	D_OUT			- counter value
+	will_overflow	- shows if next count will be with overflow
+Generation:
+	action = 0	- count up
+	action = 1	- load
+*/
 module counter_cs_forward #(
 	parameter word_width
 ) (
@@ -162,10 +259,9 @@ module counter_cs_forward #(
 	output	reg  [word_width - 1:0]	D_OUT,
 	output	wire					will_overflow
 );
-//action 0 - count, 1 - load
 wire [word_width - 2:0] count_flow = {count_flow[word_width - 3:0] & D_OUT[word_width - 2:1], D_OUT[0]};
 assign will_overflow = &D_OUT & ~action;
-always @(posedge clk) begin
+always @(posedge clk or posedge reset) begin
 	if (reset) begin
 		D_OUT <= '0;
 	end else begin
@@ -173,6 +269,21 @@ always @(posedge clk) begin
 	end
 end
 endmodule
+/*
+Provides counter with builded in subtractor.
+Parameters:
+	word_width	- width of counter value and value for loading
+Ports:
+	clk				- clock
+	action			- select action type
+	reset			- reset asynchronously
+	D_IN			- data for loading
+	D_OUT			- counter value
+	will_overflow	- shows if next count will be with overflow
+Generation:
+	action = 0	- count down
+	action = 1	- load
+*/
 module counter_cs_backward #(
 	parameter word_width
 ) (
@@ -183,10 +294,9 @@ module counter_cs_backward #(
 	output	reg  [word_width - 1:0]	D_OUT,
 	output	wire					will_overflow
 );
-//action 0 - count, 1 - load
 wire [word_width - 2:0] load_flow = {load_flow[word_width - 3:0] | D_OUT[word_width - 2:1], D_OUT[0]};
 assign will_overflow = ~(|D_OUT | action);
-always @(posedge clk) begin
+always @(posedge clk or posedge reset) begin
 	if (reset) begin
 		D_OUT <= '0;
 	end else begin
@@ -194,8 +304,19 @@ always @(posedge clk) begin
 	end
 end
 endmodule
-//NOTE: it supports non 2^n outputs, so it won`t overgenerate
-//WARNING: DO NOT SET output_width = 1
+/*
+Provides decoder.
+Parameters:
+	output_width - number of out bits (also defines width of select)
+Ports:
+	select	- value to decode
+	out		- decoded value
+Warnings:
+	DO NOT SET output_width = 1
+Notes:
+	it supports non 2^n outputs, so it won`t overgenerate
+	it`s not reccomended to decode with large output_width (it will generate multiple large AND), use predecoding instead
+*/
 module decoder #(
 	parameter output_width
 ) (
@@ -216,6 +337,9 @@ generate
 	end
 endgenerate
 endmodule
+/*
+Legacy code, will be reorganised
+*/
 module decoder_c #(
 	parameter output_width
 ) (
@@ -230,8 +354,18 @@ decoder #(.output_width(output_width)) dec (
 );
 assign out = raw_decoded & {output_width{enable}};
 endmodule
-//NOTE: it supports non 2^n inputs, so it won`t overgenerate
-//WARNING: DO NOT SET input_width = 1
+/*
+Provides encoder.
+Parameters:
+	in_width - number of select bits (also defines width of out)
+Ports:
+	select	- value to encode
+	out		- encoded value
+Warnings:
+	DO NOT SET input_width = 1
+Notes:
+	it supports non 2^n inputs, so it won`t overgenerate
+*/
 module encoder #(
 	parameter input_width
 ) (
@@ -260,6 +394,9 @@ generate
 	end
 endgenerate
 endmodule
+/*
+Legacy code, will be reorganised
+*/
 module tri_state_buffer #(
 	parameter word_width,
 	parameter word_length
