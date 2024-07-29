@@ -1,3 +1,4 @@
+`define STD_UTILS
 `define min(a, b) ((a) > (b) ? (b) : (a))
 `define max(a, b) ((a) > (b) ? (a) : (b))
 /*
@@ -260,8 +261,8 @@ module counter_cs_forward #(
 	output	wire					will_overflow
 );
 wire [word_width - 2:0] count_flow = {count_flow[word_width - 3:0] & D_OUT[word_width - 2:1], D_OUT[0]};
-assign will_overflow = &D_OUT & ~action;
-always @(posedge clk or posedge reset) begin
+assign will_overflow = &D_OUT;
+always_ff @(posedge clk or posedge reset) begin
 	if (reset) begin
 		D_OUT <= '0;
 	end else begin
@@ -295,8 +296,8 @@ module counter_cs_backward #(
 	output	wire					will_overflow
 );
 wire [word_width - 2:0] load_flow = {load_flow[word_width - 3:0] | D_OUT[word_width - 2:1], D_OUT[0]};
-assign will_overflow = ~(|D_OUT | action);
-always @(posedge clk or posedge reset) begin
+assign will_overflow = ~|D_OUT;
+always_ff @(posedge clk or posedge reset) begin
 	if (reset) begin
 		D_OUT <= '0;
 	end else begin
@@ -311,8 +312,6 @@ Parameters:
 Ports:
 	select	- value to decode
 	out		- decoded value
-Warnings:
-	DO NOT SET output_width = 1
 Notes:
 	it supports non 2^n outputs, so it won`t overgenerate
 	it`s not reccomended to decode with large output_width (it will generate multiple large AND), use predecoding instead
@@ -320,20 +319,24 @@ Notes:
 module decoder #(
 	parameter output_width
 ) (
-	input	wire [$clog2(output_width) - 1:0] select,
+	input	wire [`max($clog2(output_width), 1) - 1:0] select,
 	output	wire [output_width - 1:0] out
 );
 localparam input_width = $clog2(output_width);
-wire [input_width - 1:0] inversed_select = ~select;
 genvar i;
 genvar j;
 generate
-	for (i = 0; i < output_width; ++i) begin: decoded_output
-		wire [input_width - 1:0] selection;
-		for (j = 0; j < input_width; ++j) begin: selection_union
-			assign selection[j] = i % (2 ** (j + 1)) >= 2 ** j ? select[j] : inversed_select[j];
+	if (output_width > 1) begin
+		wire [input_width - 1:0] inversed_select = ~select;
+		for (i = 0; i < output_width; ++i) begin: decoded_output
+			wire [input_width - 1:0] selection;
+			for (j = 0; j < input_width; ++j) begin: selection_union
+				assign selection[j] = i % (2 ** (j + 1)) >= 2 ** j ? select[j] : inversed_select[j];
+			end
+			assign out[i] = &selection;
 		end
-		assign out[i] = &selection;
+	end else begin
+		assign out = select;
 	end
 endgenerate
 endmodule
@@ -344,7 +347,7 @@ module decoder_c #(
 	parameter output_width
 ) (
 	input	wire enable,
-	input	wire [$clog2(output_width) - 1:0] select,
+	input	wire [`max($clog2(output_width), 1) - 1:0] select,
 	output	wire [output_width - 1:0] out
 );
 wire [output_width - 1:0] raw_decoded;
@@ -370,27 +373,31 @@ module encoder #(
 	parameter input_width
 ) (
 	input wire [input_width - 1:0] select,
-	output wire	[$clog2(input_width) - 1:0] out
+	output wire	[`max($clog2(input_width), 1) - 1:0] out
 );
 localparam output_width = $clog2(input_width);
 genvar i;
 genvar j;
 generate
-	for (i = 0; i < output_width; ++i) begin: encoded_output
-		localparam unit_size = 2 ** i;
-		localparam rest_width = input_width % (2 * unit_size);
-		localparam full_width = (input_width - rest_width) / 2;
-		localparam collector_size = full_width + (rest_width > unit_size ? rest_width % unit_size : 0);
-		wire [collector_size - 1:0] collector;
-		for (j = 0; j < collector_size; j = j + unit_size) begin: selection_union
-			localparam target_start = j * 2 + unit_size;
-			assign collector[`min(collector_size, j + unit_size) - 1:j] = select[`min(input_width, target_start + unit_size) - 1:target_start];
+	if (input_width > 1) begin
+		for (i = 0; i < output_width; ++i) begin: encoded_output
+			localparam unit_size = 2 ** i;
+			localparam rest_width = input_width % (2 * unit_size);
+			localparam full_width = (input_width - rest_width) / 2;
+			localparam collector_size = full_width + (rest_width > unit_size ? rest_width % unit_size : 0);
+			wire [collector_size - 1:0] collector;
+			for (j = 0; j < collector_size; j = j + unit_size) begin: selection_union
+				localparam target_start = j * 2 + unit_size;
+				assign collector[`min(collector_size, j + unit_size) - 1:j] = select[`min(input_width, target_start + unit_size) - 1:target_start];
+			end
+			if (collector_size > 1) begin
+				assign out[i] = |collector;
+			end else begin
+				assign out[i] = collector;
+			end
 		end
-		if (collector_size > 1) begin
-			assign out[i] = |collector;
-		end else begin
-			assign out[i] = collector;
-		end
+	end else begin
+		assign out = select;
 	end
 endgenerate
 endmodule

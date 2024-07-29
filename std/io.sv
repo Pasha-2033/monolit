@@ -1,111 +1,114 @@
-`define UART_ONESTOPBIT		2'h0	//TODO (replace to enum)
-`define UART_ONE5STOPBITS	2'h1
-`define UART_TWOSTOPBITS	2'h2
-`define UART_NOPARITY		3'h0
-`define UART_ODDPARITY		3'h1
-`define UART_EVENPARITY		3'h2
-`define UART_SPACEPARITY	3'h3
-`define UART_MARKPARITY		3'h4
-//UART receiver
-module _UART_RX #(
-	parameter word_width = 8,
-	parameter reductor_width = 4
+`ifndef STD_UTILS
+	`include "utils.sv"
+`endif
+`define STD_IO
+typedef enum bit {R_HIGH_SCL, R_LOW_SCL} IIC_R_STATE;
+typedef enum bit {W_HIGH_SCL, W_LOW_SCL} IIC_W_STATE;
+//doesn`t support 4+ versions of IIC
+module _IIC_handler #(
+	parameter word_width = 8
 )(
-	input	wire					clk,
-	input	wire [1:0]				stopbitnum,
-	input	wire [2:0]				paritytype,
-	output	reg  [word_width - 1:0]	word,
-	output	wire					word_parity_status,
-	output	wire					word_stop_status,
-	output	wire [1:0]				receiver_state,
-	//UART-UART interface
-	input	wire					RX
+	input	wire						clk,	
+	input	wire						NRCS,	//~(read completed successful)
+	input	wire						WE,
+	input	wire	[word_width - 1:0]	D_IN,
+	output	reg		[word_width - 1:0]	D_OUT,
+	output	wire						signal,
+	//IIC interface
+	input	wire						SDA_IN,
+	input	wire						SCL_IN,
+	output	wire						SDA_OUT,
+	output	reg							SCL_OUT
 );
-reg [reductor_width - 1:0] reductor_to_tick;
-reg parity;
-reg [1:0] stopbits;
-wire [word_width:0] word_with_parity = {parity, word};
-wire action_counter_overflow;
-wire [reductor_width - 1:0] reductor_value;
-counter_cs_backward #(.word_width($clog2(word_width))) action_counter (
-	.clk((tick & (state == RECEIVING_WORD)) | (~RX & (state == IDLE))),
-	.action(~RX & (state == IDLE)),
-	.reset('0),
-	.D_IN(word_width - 1),
-	.D_OUT(word_counter_value),
-	.will_overflow(action_counter_overflow)
-);
-counter_cs_forward #(.word_width(reductor_width)) reductor (
-	.clk(clk),
-	.action('0),
-	.reset('0),
-	.D_IN('0),
-	.D_OUT(reductor_value)
-);
-enum reg [1:0] {IDLE, RECEIVING_WORD, RECEIVING_PARITY, RECEIVING_STOPBITS} state = IDLE;
-wire tick = (reductor_value == reductor_to_tick);
-wire half_tick = ({~reductor_value[reductor_width - 1], reductor_value[reductor_width - 2:0]} == reductor_to_tick);
-wire word_xor_parity = ^word_with_parity;
-wire [4:0] parities = {
-	2'b0,				//TODO (UART_MARKPARITY & UART_SPACEPARITY)
-	~word_xor_parity,	//UART_EVENPARITY
-	word_xor_parity,	//UART_ODDPARITY
-	1'b1				//UART_NOPARITY
-};
-assign word_parity_status = parities[paritytype];
-assign word_stop_status = &stopbits;
-assign receiver_state = state;
-always @(posedge clk) begin
-	case (state)
-		IDLE: begin
-			if (~RX) begin
-				state <= RECEIVING_WORD;
-				stopbits <= 2'b0;
-				reductor_to_tick <= {~reductor_value[reductor_width - 1], reductor_value[reductor_width - 2:0]};
+reg read_state;
+reg write_state;
+reg R_SDA;
+reg W_SDA;
+assign SDA_OUT = R_SDA & W_SDA;
+assign signal = SCL_IN & (D_OUT[0] ^ SDA_IN);
+always_ff @(posedge clk) begin
+	case(read_state)
+		R_HIGH_SCL: begin
+			if (SCL_IN) begin
+				D_OUT <= {D_OUT[word_width - 2:0], SDA_IN};
+				read_state <= R_LOW_SCL;
 			end
 		end
-		RECEIVING_WORD: begin
-			if (tick) begin
-				//NOTE: this line defines wich side shift is made
-				word <= {RX, word[word_width - 1:1]};
-				if (action_counter_overflow) begin
-					state <= paritytype == `UART_NOPARITY ? RECEIVING_STOPBITS : RECEIVING_PARITY;
-				end
+		R_LOW_SCL: begin
+			if (~SCL_IN) begin
+				R_SDA <= NRCS;	//ACK
+				read_state <= R_HIGH_SCL;
 			end
 		end
-		RECEIVING_PARITY: begin
-			if (tick) begin
-				parity <= RX;
-				state <= RECEIVING_STOPBITS;
+	endcase
+	case (write_state)
+		W_HIGH_SCL: begin
+			if (SCL_IN & WE/*TODO*/) begin
+				write_state <= W_LOW_SCL;
+				SCL_OUT <= '0;
 			end
 		end
-		RECEIVING_STOPBITS: begin
-			if (~stopbits[0] & tick) begin
-				if (RX) begin
-					if (stopbitnum == `UART_ONESTOPBIT) begin
-						state <= IDLE;
-						stopbits[1] <= '1;
-					end
-					stopbits[0] <= RX;
-				end else begin
-					state <= IDLE;
-				end
-			end
-			if (stopbits[0] & (stopbitnum == `UART_ONE5STOPBITS ? half_tick : tick)) begin
-				stopbits[1] <= RX;
-				state <= IDLE;
-			end
+		W_LOW_SCL: begin
+			//set data bit/ACK/NACK
+			write_state <= W_HIGH_SCL;
+			SCL_OUT <= '1;
 		end
 	endcase
 end
 endmodule
-//UART transitor
-module _UART_TX #(
-	parameters
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+Warnings:
+	DO NOT SET SS_width = 1
+*/
+module SPI #(
+	parameter word_width = 8,
+	parameter SS_width = 1
 ) (
-	input	wire					clk,
-	//UART-UART interface
-	output	wire					TX
+	input	wire										clk,
+	input	wire										SE,			//sync edge 0 - high, 1 - low (CPOL ^ CPHA)
+	input	wire										WE,			
+	input	wire										SSE,		//slave seletion enable (can be set to 1 ONLY BY MASTER!!!)
+	input	wire	[`max($clog2(SS_width), 1) - 1:0]	SSV,		//slave selection value
+	input	wire	[word_width - 1:0]					D_IN,
+	output	reg		[word_width - 1:0]					D_OUT,
+	//SPI interface
+	input	wire										SS_IN,		//slave selection (if master - always 1)
+	input	wire										SCLK,		//master and slave will use same SCLK for shift registers (but only master can clock - clk & en)
+	input	wire										SD_IN,		//MOSI - if slave else - MISO
+	output	wire										SD_OUT,		//MISO - if slave else - MOSI
+	output	wire	[SS_width - 1:0]					SS_OUT		//slave selection
 );
-	
+decoder_c #(.output_width(SS_width)) SS_decoder (
+	.enable(SSE),
+	.select(SSV),
+	.out(SS_OUT)
+);
+assign SD_OUT = D_OUT[word_width - 1];
+wire SPI_clk = SS_IN ? clk : SE ^ SCLK;
+always_ff @(posedge SPI_clk) begin
+	if (SS_IN & ~SSE) begin
+		if (WE) begin
+			D_OUT <= D_IN;
+		end
+	end else begin
+		D_OUT <= {D_OUT[word_width - 2:0], SD_IN};
+	end
+end
 endmodule

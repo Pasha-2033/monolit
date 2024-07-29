@@ -10,12 +10,13 @@ fast_adder #(.cascade_size(4), .word_width(16)) fa (
 	.A(D_IN[15:0]), 
 	.B(D_IN[31:16])
 );
-//UART
-wire RX, TX;
-wire R_locked, T_locked;
-_UART_RX rx (
-	.clk(clk),
-	.RX(D_IN[1])
+//IIC
+_IIC_handler #(.word_width(8)) iich (
+	.clk
+);
+//SPI
+SPI #(.word_width(8), .SS_width(1)) spi (
+	.clk
 );
 //Counter (complex)
 counter_c #(.word_width(8)) cc (
