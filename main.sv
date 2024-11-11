@@ -1,7 +1,7 @@
 module main (
 	input wire clk,
 	input wire [31:0] D_IN,
-	output wire [2 ** 12 - 1:0] D_OUT
+	output wire [2 ** 5 - 1:0] D_OUT
 );
 //Fast adder
 wire P, G, C_OUT, C_IN;
@@ -10,28 +10,36 @@ fast_adder #(.cascade_size(4), .word_width(16)) fa (
 	.A(D_IN[15:0]), 
 	.B(D_IN[31:16])
 );
+//Fast comparator
+fast_comparator #(.word_width(1)) fc (
+	.A(D_IN[15:0]),
+	.B(D_IN[31:16])
+);
 //IIC
-_IIC_handler #(.word_width(8)) iich (
-	.clk
+IIC #(.word_width(8)) iic (
+	.clk(clk)
 );
 //SPI
 SPI #(.word_width(8), .SS_width(1)) spi (
-	.clk
+	.clk(clk)
 );
 //Counter (complex)
-counter_c #(.word_width(8)) cc (
+counter #(.word_width(8)) cc (
 	.clk(clk)
 );
-counter_cs_forward #(.word_width(8)) ccsf (
+counter_forward #(.word_width(8)) ccsf (
 	.clk(clk)
 );
-counter_cs_backward #(.word_width(8)) ccsb (
+counter_backward #(.word_width(8)) ccsb (
 	.clk(clk)
 );
 //decoder
-decoder #(.output_width(2 ** 12)) dec (
+_array_decoder #(.output_width(2 ** 5)) dec (
 	.select(D_IN[12:0]),
 	.out(D_OUT)
+);
+_tree_decoder #(.output_width(12)) dec2 (
+	.select(D_IN[3:0])
 );
 //encoder
 encoder #(.input_width(5)) enc (

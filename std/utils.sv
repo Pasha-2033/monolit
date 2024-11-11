@@ -107,6 +107,56 @@ generate
 	end
 endgenerate
 endmodule
+/*
+Provides fast comparator.
+Parameters:
+	word_width	- width of operand
+Ports:
+	A			- A operand
+	B			- B operand
+	above		- if A > B
+	below		- if A < B
+*/
+//equal = ~(above | below)
+module fast_comparator #(
+	parameter word_width
+) (
+	input	wire [word_width - 1:0]	A,
+	input	wire [word_width - 1:0]	B,
+	output	wire above,
+	output	wire below
+);
+wire [word_width - 1:0] pre_above = A & ~B;
+wire [word_width - 1:0] pre_below = ~A & B;
+genvar i;
+generate
+	if (word_width > 1) begin
+		localparam i_limit = $clog2(word_width) - 1;
+		localparam cv = 2 ** (i_limit + 1) - word_width;
+		wire [2 ** (i_limit + 1) - 2:0] above_tree;
+		wire [2 ** (i_limit + 1) - 2:0] below_tree;
+		assign above = above_tree[0];
+		assign below = below_tree[0];
+		for (i = 0; i < i_limit; ++i) begin : compare_lvl
+			localparam size = 2 ** i;
+			localparam senior = size * 2 - 1;
+			localparam junior = senior * 2;
+			assign above_tree[size - 1+:size] = above_tree[junior-:size] | (above_tree[senior+:size] & ~below_tree[junior-:size]);
+			assign below_tree[size - 1+:size] = below_tree[junior-:size] | (~above_tree[junior-:size] & below_tree[senior+:size]);
+		end
+		localparam size = 2 ** i_limit;
+		assign above_tree[size - 1+:size - cv] = pre_above[word_width - cv - 1-:size - cv] | (pre_above[size - 1:0] & ~pre_below[word_width - cv - 1-:size - cv]);
+		assign below_tree[size - 1+:size - cv] = pre_below[word_width - cv - 1-:size - cv] | (~pre_above[word_width - cv - 1-:size - cv] & pre_below[size - 1:0]);
+		if (cv) begin
+			assign above_tree[2 ** (i_limit + 1) - 2-:cv] = pre_above[word_width - 1-:cv];
+			assign below_tree[2 ** (i_limit + 1) - 2-:cv] = pre_below[word_width - 1-:cv];
+		end
+	end else begin
+		assign above = pre_above;
+		assign below = pre_below;
+	end
+endgenerate
+endmodule
 //CARRY is a special case of DOUBLE_PRECISION
 typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
 //WARNING: DO NOT SET $size(C_IN) != 1
@@ -213,7 +263,7 @@ Generation:
 	count = 1 & load = 0 - count up
 	count = 1 & load = 1 - count down
 */
-module counter_c #(
+module counter #(
 	parameter word_width
 ) (
 	input	wire					clk,
@@ -250,7 +300,7 @@ Generation:
 	action = 0	- count up
 	action = 1	- load
 */
-module counter_cs_forward #(
+module counter_forward #(
 	parameter word_width
 ) (
 	input	wire					clk,
@@ -285,7 +335,7 @@ Generation:
 	action = 0	- count down
 	action = 1	- load
 */
-module counter_cs_backward #(
+module counter_backward #(
 	parameter word_width
 ) (
 	input	wire					clk,
@@ -316,17 +366,17 @@ Notes:
 	it supports non 2^n outputs, so it won`t overgenerate
 	it`s not reccomended to decode with large output_width (it will generate multiple large AND), use predecoding instead
 */
-module decoder #(
+module _array_decoder #(
 	parameter output_width
 ) (
-	input	wire [`max($clog2(output_width), 1) - 1:0] select,
+	input	wire [$clog2(`max(output_width, 2)) - 1:0] select,
 	output	wire [output_width - 1:0] out
 );
-localparam input_width = $clog2(output_width);
 genvar i;
 genvar j;
 generate
 	if (output_width > 1) begin
+		localparam input_width = $clog2(output_width);
 		wire [input_width - 1:0] inversed_select = ~select;
 		for (i = 0; i < output_width; ++i) begin: decoded_output
 			wire [input_width - 1:0] selection;
@@ -341,17 +391,59 @@ generate
 endgenerate
 endmodule
 /*
+Provides decoder.
+Parameters:
+	output_width - number of out bits (also defines width of select)
+Ports:
+	enable	- will set all outputs to 0
+	select	- value to decode
+	out		- decoded value
+Notes:
+	it supports non 2^n outputs, so it won`t overgenerate
+*/
+module _tree_decoder #(
+	parameter output_width
+) (
+	input	wire										enable,
+	input	wire [$clog2(`max(output_width, 2)) - 1:0]	select,
+	output	wire [output_width - 1:0]					out
+);
+genvar i;
+generate
+	if (output_width > 1) begin
+		localparam input_width = $clog2(output_width);
+		wire [2 ** (input_width) - 2:0] mux_tree;
+		assign mux_tree[0] = enable;
+		for (i = 1; i < input_width; ++i) begin: main_tree
+			localparam size = 2 ** (i - 1);
+			assign mux_tree[2 ** i - 1+:2 ** i] = {select[i - 1] ? mux_tree[2 ** i - 2-:size] : '0, select[i - 1] ? '0 : mux_tree[size - 1+:size]};
+		end
+		localparam size = 2 ** (input_width - 1);
+		assign out = {select[input_width - 1] ? mux_tree[size - 1+:output_width - size] : '0, select[input_width - 1] ? '0 : mux_tree[size - 1+:size]};
+	end else begin
+		assign out = select & enable;
+	end
+endgenerate
+endmodule
+module decoder #(
+	parameter output_width
+) (
+	
+);
+//is array/tree decoder
+endmodule
+/*
 Legacy code, will be reorganised
 */
 module decoder_c #(
 	parameter output_width
 ) (
 	input	wire enable,
-	input	wire [`max($clog2(output_width), 1) - 1:0] select,
+	input	wire [$clog2(`max(output_width, 2)) - 1:0] select,
 	output	wire [output_width - 1:0] out
 );
 wire [output_width - 1:0] raw_decoded;
-decoder #(.output_width(output_width)) dec (
+_array_decoder #(.output_width(output_width)) dec (
 	.select(select),
 	.out(raw_decoded)
 );
@@ -364,8 +456,6 @@ Parameters:
 Ports:
 	select	- value to encode
 	out		- encoded value
-Warnings:
-	DO NOT SET input_width = 1
 Notes:
 	it supports non 2^n inputs, so it won`t overgenerate
 */
@@ -373,7 +463,7 @@ module encoder #(
 	parameter input_width
 ) (
 	input wire [input_width - 1:0] select,
-	output wire	[`max($clog2(input_width), 1) - 1:0] out
+	output wire	[$clog2(`max(input_width, 2)) - 1:0] out
 );
 localparam output_width = $clog2(input_width);
 genvar i;

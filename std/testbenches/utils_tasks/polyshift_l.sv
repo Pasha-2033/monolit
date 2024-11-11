@@ -24,7 +24,7 @@ wire [3:0][word_width - 1:0] expected_value = {
 	$signed(D_IN) <<< _size,
 	D_IN << _size
 };
-task automatic run(input [word_width - 1:0] value, input [word_width - 2:0] double_precision);
+task run(input [word_width - 1:0] value, input [word_width - 2:0] double_precision);
 	begin
 		D_IN = value;
 		C_IN = double_precision;

@@ -294,7 +294,7 @@ module _fuc_ll_timer #(
 genvar i;
 generate
 	for (i = 0; i < cash_length; ++i) begin: time_unit
-		counter_cs_backward #(.word_width(call_time_size)) iterator (
+		counter_backward #(.word_width(call_time_size)) iterator (
 			.clk(clk & ~units_time_will_overflow[i]),
 			.action(units_equal[i] & load),
 			.reset('0),
@@ -334,7 +334,7 @@ wire has_empty_unit;
 wire counter_will_overflow;
 assign request_string = (state == FETCH);
 assign ready = (state == IDLE) & has_unit;
-counter_cs_forward #(.word_width($clog2(cash_length))) iterator (
+counter_forward #(.word_width($clog2(cash_length))) iterator (
 	.clk(clk),
 	.action((state == IDLE) & ~has_unit),
 	.reset('0),
