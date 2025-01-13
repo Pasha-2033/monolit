@@ -5,7 +5,7 @@ module main (
 );
 //Fast adder
 wire P, G, C_OUT, C_IN;
-fast_adder #(.cascade_size(4), .word_width(16)) fa (
+CLAA #(.cascade_size(4), .word_width(16)) fa (
 	.C_IN(C_IN), 
 	.A(D_IN[15:0]), 
 	.B(D_IN[31:16])

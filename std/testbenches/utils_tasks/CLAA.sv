@@ -1,4 +1,4 @@
-module task_fast_adder #(
+module task_CLAA #(
 	parameter cascade_size,
 	parameter word_width
 );
@@ -7,7 +7,7 @@ logic [word_width - 1:0] A;
 logic [word_width - 1:0] B;
 wire [word_width - 1:0] R;
 wire C_OUT;
-fast_adder #(.cascade_size(cascade_size), .word_width(word_width)) fa (
+CLAA #(.cascade_size(cascade_size), .word_width(word_width)) fa (
 	.C_IN('0),
 	.A(A),
 	.B(B),

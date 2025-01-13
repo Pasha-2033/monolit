@@ -25,6 +25,30 @@ generate
 endgenerate
 endmodule
 /*
+Will create ripple carry adder improved by Manchester carry chain
+*/
+module RCA_M #(
+	parameter word_width
+) (
+	input	wire					C_IN,
+	input	wire [word_width - 1:0]	A,
+	input	wire [word_width - 1:0]	B,
+	output	wire [word_width - 1:0]	R,
+	output	wire					C_OUT
+);
+wire [word_width:0] C;
+wire [word_width - 1:0] OR = A | B;
+wire [word_width - 1:0] AND = A & B;
+wire [word_width - 1:0] PRE_XOR = OR & ~AND;
+wire [word_width - 1:0] XOR = PRE_XOR ^ C;
+assign C[0] = C_IN;
+assign C_OUT = C[word_width];
+genvar i;
+for (i = 0; i < word_width; ++i) begin: RCA_unit
+	C[i + 1] = PRE_XOR[i] ? C[i] : AND[i];
+end
+endmodule
+/*
 Will create carry-lookahead adder (faster addition operation).
 Parameters:
 	word_width		- width of operands and result
@@ -40,12 +64,12 @@ Ports:
 	G		- generation
 	C_OUT	- cary output
 Generation:
-	fast_adder is recusrsive module
+	CLAA is recusrsive module
 	if word_width > cascade_size then lookahead and lower level is generated
 	else ripple-carry adder is generated
 	lower level is smaller fast adders
 */
-module fast_adder #(
+module CLAA #(
 	parameter cascade_size = 4,
 	parameter word_width = 4
 ) (
@@ -72,7 +96,7 @@ generate
 	if (cascade_num > 1) begin
 		//creating lowest level
 		for(i = 0; i < cascade_size; ++i) begin: adder_cascade
-			fast_adder #(.cascade_size(cascade_size), .word_width(cascade_num)) child_fast_adder (
+			CLAA #(.cascade_size(cascade_size), .word_width(cascade_num)) child_CLAA (
 				.C_IN(C[i]),
 				.A(A[i * cascade_num+:cascade_num]),
 				.B(B[i * cascade_num+:cascade_num]),
