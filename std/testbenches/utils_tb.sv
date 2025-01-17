@@ -4,13 +4,15 @@
 `include "fast_comparator.sv"
 `include "polyshift_r.sv"
 `include "polyshift_l.sv"
+`include "RCA_M.sv"
 `timescale 1ps/1ps
 module utils_tb;
 task__tree_decoder #(.output_width(12)) _td();
-task_CLAA #(.cascade_size(4), .word_width(16)) fa();
+task_CLAA #(.cascade_size(4), .word_width(16)) claa();
 task_fast_comparator #(.word_width(7)) fc();
 task_polyshift_r #(.word_width(8)) psr();
 task_polyshift_l #(.word_width(8)) psl();
+task_RCA_M #(.word_width(16)) rca_m();
 initial begin
 	$display("_tree_decoder task:");
 	_td.run(0);
@@ -19,7 +21,9 @@ initial begin
 	_td.run(10);
 	_td.run(11);
 	$display("CLAA task:");
-	fa.run(10, 20);
+	repeat (10) begin
+		claa.run($urandom, $urandom);
+	end
 	$display("fast_comparator task:");
 	fc.run(2, 1);
 	fc.run(1, 2);
@@ -32,5 +36,9 @@ initial begin
 	psr.run(8'b11001100, 7'b0101010);
 	$display("polyshift_l task:");
 	psl.run(8'b00110011, 7'b1010101);
+	$display("RCA_M task:");
+	repeat (10) begin
+		rca_m.run($urandom, $urandom);
+	end
 end
 endmodule
