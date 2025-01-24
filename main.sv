@@ -4,8 +4,13 @@ module main (
 	output wire [2 ** 5 - 1:0] D_OUT
 );
 //Fast adder
-wire P, G, C_OUT, C_IN;
-CLAA #(.cascade_size(4), .word_width(16)) fa (
+wire P, G, C, C_IN;
+RCA_M #(.word_width(16)) rca_m (
+	.C_IN(C_IN),
+	.A(D_IN[15:0]),
+	.B(D_IN[31:16])
+);
+CLAA #(.cascade_size(4), .word_width(16)) claa (
 	.C_IN(C_IN), 
 	.A(D_IN[15:0]), 
 	.B(D_IN[31:16])
