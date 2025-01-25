@@ -56,37 +56,15 @@ encoder #(.input_width(17)) enc2 (
 //shifts
 wire [7:0] D = D_IN[7:0];
 polyshift_l #(.word_width(8)) psl (
-	.C_IN(`RCL(D, D_IN[13])),
+	.C_IN(`RCL(D, C)),
 	.D_IN(D),
 	.shift_size(D_IN[10:8]),
 	.shift_type(D_IN[12:11])
 );
 polyshift_r #(.word_width(8)) psr (
-	.C_IN(`RCR(D, D_IN[13])),
+	.C_IN(`RCR(D, C)),
 	.D_IN(D),
 	.shift_size(D_IN[10:8]),
 	.shift_type(D_IN[12:11])
-);
-//cash
-_fbsoc_string_container #(.address_size(4), .data_size(4), .cash_length(16)) str_con (
-	.clk(clk),
-	.write(D_IN[0]),
-	.index(D_IN[4:1]),
-	.D_IN(D_IN[8:5])
-);
-
-
-
-_fuc_ll_container #(.address_size(4), .data_size(4), .cash_length(16)) fuc_s (
-	.clk(clk),
-	.action(D_IN[0]),
-	.address(D_IN[4:1]),
-	.data(D_IN[28:25])
-);
-fast_unordered_cash #(.address_size(4), .data_size(4), .cash_length(16), .call_time_size(4)) fuc (
-	.clk(clk),
-	.action(D_IN[0]),
-	.address(D_IN[4:1]),
-	.data(D_IN[8:5])
 );
 endmodule

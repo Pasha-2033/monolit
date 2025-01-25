@@ -18,9 +18,12 @@ module bit_reverse #(
 	input	wire [word_width - 1:0] in,
 	output	wire [word_width - 1:0] out
 );
-for(genvar i = 0; i < word_width; ++i) begin: reverse
-	assign out[i] = in[word_width - i - 1];
-end
+genvar i;
+generate
+	for(i = 0; i < word_width; ++i) begin: reverse
+		assign out[i] = in[word_width - i - 1];
+	end
+endgenerate
 endmodule
 /*
 Will create ripple carry adder improved by Manchester carry chain
@@ -41,9 +44,12 @@ wire [word_width - 1:0] XOR = OR & ~AND;
 assign R = XOR ^ C;
 assign C[0] = C_IN;
 assign C_OUT = C[word_width];
-for (genvar i = 0; i < word_width; ++i) begin: RCA_unit
-	assign C[i + 1] = XOR[i] ? C[i] : AND[i];
-end
+genvar i;
+generate
+	for (i = 0; i < word_width; ++i) begin: RCA_unit
+		assign C[i + 1] = XOR[i] ? C[i] : AND[i];
+	end
+endgenerate
 endmodule
 
 
@@ -74,13 +80,16 @@ assign C = {G | (P & C[cascade_size - 1:0]), C_IN};
 assign PG = &P;
 assign GG = |PRE_GG;
 //lookahead implementation
-for(genvar i = 0; i < cascade_size; ++i) begin: signal_cascade
-	if (i == cascade_size - 1) begin
-		assign PRE_GG[i] = G[i];
-	end else begin
-		assign PRE_GG[i] = G[i] & (&P[cascade_size - 1:i + 1]);
-	end 
-end
+genvar i;
+generate
+	for(i = 0; i < cascade_size; ++i) begin: signal_cascade
+		if (i == cascade_size - 1) begin
+			assign PRE_GG[i] = G[i];
+		end else begin
+			assign PRE_GG[i] = G[i] & (&P[cascade_size - 1:i + 1]);
+		end 
+	end
+endgenerate
 endmodule
 /*
 Will create carry-lookahead adder (faster addition operation).
@@ -119,24 +128,24 @@ localparam cascade_num = word_width / cascade_size;
 wire [cascade_size - 1:0] P;
 wire [cascade_size - 1:0] G;
 wire [cascade_size - 1:0] C;
-genvar i;
-genvar j;
-if (cascade_num > 1) begin
-	//creating lowest level
-	CLAA #(.cascade_size(cascade_size), .word_width(cascade_num)) child_CLAA [cascade_size - 1:0] (
-		.C_IN(C[cascade_num - 1:0]),
-		.A(A),
-		.B(B),
-		.R(R),
-		.PG(P),
-		.GG(G)
-	);
-end else begin
-	//lowest level implementation
-	assign P = A | B;
-	assign G = A & B;
-	assign R = (P & ~G) ^ C;
-end
+generate
+	if (cascade_num > 1) begin
+		//creating lowest level
+		CLAA #(.cascade_size(cascade_size), .word_width(cascade_num)) child_CLAA [cascade_size - 1:0] (
+			.C_IN(C[cascade_num - 1:0]),
+			.A(A),
+			.B(B),
+			.R(R),
+			.PG(P),
+			.GG(G)
+		);
+	end else begin
+		//lowest level implementation
+		assign P = A | B;
+		assign G = A & B;
+		assign R = (P & ~G) ^ C;
+	end
+endgenerate
 //lookahead implementation
 _LA #(.cascade_size(cascade_size)) lookahead (
 	.C_IN(C_IN),
@@ -202,15 +211,17 @@ RCA_M #(.word_width(unit_width - 1)) junior_adder ( //...
 	.R(R[unit_width - 2:0]), //...
 	.C_OUT(ALL_C[0])
 );
-if (csa_units_num > 1) begin
-	_CSA_U #(.word_width(unit_width)) selection_unit [csa_units_num - 2:0] ( //...
-		.C_IN(ALL_C[csa_units_num - 2:0]), //...
-		.A(A[word_width - 1:unit_width - 1]), //...
-		.B(B[word_width - 1:unit_width - 1]), //...
-		.R(R[word_width - 1:unit_width - 2]), //...
-		.C_OUT(ALL_C[csa_units_num - 1:1]) //...
-	);
-end
+generate
+	if (csa_units_num > 1) begin
+		_CSA_U #(.word_width(unit_width)) selection_unit [csa_units_num - 2:0] ( //...
+			.C_IN(ALL_C[csa_units_num - 2:0]), //...
+			.A(A[word_width - 1:unit_width - 1]), //...
+			.B(B[word_width - 1:unit_width - 1]), //...
+			.R(R[word_width - 1:unit_width - 2]), //...
+			.C_OUT(ALL_C[csa_units_num - 1:1]) //...
+		);
+	end
+endgenerate
 endmodule
 /*
 dynamic size carry select adder
@@ -253,31 +264,34 @@ module fast_comparator #(
 );
 wire [word_width - 1:0] pre_above = A & ~B;
 wire [word_width - 1:0] pre_below = ~A & B;
-if (word_width > 1) begin
-	localparam i_limit = $clog2(word_width) - 1;
-	localparam cv = 2 ** (i_limit + 1) - word_width;
-	wire [2 ** (i_limit + 1) - 2:0] above_tree;
-	wire [2 ** (i_limit + 1) - 2:0] below_tree;
-	assign above = above_tree[0];
-	assign below = below_tree[0];
-	for (genvar i = 0; i < i_limit; ++i) begin : compare_lvl
-		localparam size = 2 ** i;
-		localparam senior = size * 2 - 1;
-		localparam junior = senior * 2;
-		assign above_tree[size - 1+:size] = above_tree[junior-:size] | (above_tree[senior+:size] & ~below_tree[junior-:size]);
-		assign below_tree[size - 1+:size] = below_tree[junior-:size] | (~above_tree[junior-:size] & below_tree[senior+:size]);
+genvar i;
+generate
+	if (word_width > 1) begin
+		localparam i_limit = $clog2(word_width) - 1;
+		localparam cv = 2 ** (i_limit + 1) - word_width;
+		wire [2 ** (i_limit + 1) - 2:0] above_tree;
+		wire [2 ** (i_limit + 1) - 2:0] below_tree;
+		assign above = above_tree[0];
+		assign below = below_tree[0];
+		for (i = 0; i < i_limit; ++i) begin : compare_lvl
+			localparam size = 2 ** i;
+			localparam senior = size * 2 - 1;
+			localparam junior = senior * 2;
+			assign above_tree[size - 1+:size] = above_tree[junior-:size] | (above_tree[senior+:size] & ~below_tree[junior-:size]);
+			assign below_tree[size - 1+:size] = below_tree[junior-:size] | (~above_tree[junior-:size] & below_tree[senior+:size]);
+		end
+		localparam size = 2 ** i_limit;
+		assign above_tree[size - 1+:size - cv] = pre_above[word_width - cv - 1-:size - cv] | (pre_above[size - 1:0] & ~pre_below[word_width - cv - 1-:size - cv]);
+		assign below_tree[size - 1+:size - cv] = pre_below[word_width - cv - 1-:size - cv] | (~pre_above[word_width - cv - 1-:size - cv] & pre_below[size - 1:0]);
+		if (cv) begin
+			assign above_tree[2 ** (i_limit + 1) - 2-:cv] = pre_above[word_width - 1-:cv];
+			assign below_tree[2 ** (i_limit + 1) - 2-:cv] = pre_below[word_width - 1-:cv];
+		end
+	end else begin
+		assign above = pre_above;
+		assign below = pre_below;
 	end
-	localparam size = 2 ** i_limit;
-	assign above_tree[size - 1+:size - cv] = pre_above[word_width - cv - 1-:size - cv] | (pre_above[size - 1:0] & ~pre_below[word_width - cv - 1-:size - cv]);
-	assign below_tree[size - 1+:size - cv] = pre_below[word_width - cv - 1-:size - cv] | (~pre_above[word_width - cv - 1-:size - cv] & pre_below[size - 1:0]);
-	if (cv) begin
-		assign above_tree[2 ** (i_limit + 1) - 2-:cv] = pre_above[word_width - 1-:cv];
-		assign below_tree[2 ** (i_limit + 1) - 2-:cv] = pre_below[word_width - 1-:cv];
-	end
-end else begin
-	assign above = pre_above;
-	assign below = pre_below;
-end
+endgenerate
 endmodule
 //CARRY is a special case of DOUBLE_PRECISION
 typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
@@ -318,9 +332,12 @@ wire [word_width - 2:0] shift_arg = shift_args[shift_type];
 wire [word_width - 1:0][word_width - 1:0] shift_input;
 assign shift_input[0] = D_IN;
 assign D_OUT = shift_input[shift_size];
-for(genvar i = 1; i < word_width; ++i) begin: input_generation
-	assign shift_input[i] = {shift_arg[i - 1:0], D_IN[word_width - 1:i]};
-end
+genvar i;
+generate
+	for(i = 1; i < word_width; ++i) begin: input_generation
+		assign shift_input[i] = {shift_arg[i - 1:0], D_IN[word_width - 1:i]};
+	end
+endgenerate
 endmodule
 //NOTE: RCL is usually uses $size(C_IN) = 1
 //WARNING: DO NOT SET $size(C_IN) >= $size(D_IN)!
@@ -359,9 +376,12 @@ wire [word_width - 2:0] shift_arg = shift_args[shift_type];
 wire [word_width - 1:0][word_width - 1:0] shift_input;
 assign shift_input[0] = D_IN;
 assign D_OUT = shift_input[shift_size];
-for(genvar i = 1; i < word_width; ++i) begin: input_generation
-	assign shift_input[i] = {D_IN[word_width - i - 1:0], shift_arg[word_width - 2:word_width - i - 1]};
-end
+genvar i;
+generate
+	for(i = 1; i < word_width; ++i) begin: input_generation
+		assign shift_input[i] = {D_IN[word_width - i - 1:0], shift_arg[word_width - 2:word_width - i - 1]};
+	end
+endgenerate
 endmodule
 /*
 Provides counter with builded in adder and subtractor.
@@ -490,19 +510,23 @@ module _array_decoder #(
 	input	wire [$clog2(`max(output_width, 2)) - 1:0] select,
 	output	wire [output_width - 1:0] out
 );
-if (output_width > 1) begin
-	localparam input_width = $clog2(output_width);
-	wire [input_width - 1:0] inversed_select = ~select;
-	for (genvar i = 0; i < output_width; ++i) begin: decoded_output
-		wire [input_width - 1:0] selection;
-		for (genvar j = 0; j < input_width; ++j) begin: selection_union
-			assign selection[j] = i % (2 ** (j + 1)) >= 2 ** j ? select[j] : inversed_select[j];
+genvar i;
+genvar j;
+generate
+	if (output_width > 1) begin
+		localparam input_width = $clog2(output_width);
+		wire [input_width - 1:0] inversed_select = ~select;
+		for (i = 0; i < output_width; ++i) begin: decoded_output
+			wire [input_width - 1:0] selection;
+			for (j = 0; j < input_width; ++j) begin: selection_union
+				assign selection[j] = i % (2 ** (j + 1)) >= 2 ** j ? select[j] : inversed_select[j];
+			end
+			assign out[i] = &selection;
 		end
-		assign out[i] = &selection;
+	end else begin
+		assign out = select;
 	end
-end else begin
-	assign out = select;
-end
+endgenerate
 endmodule
 /*
 Provides decoder.
@@ -522,19 +546,22 @@ module _tree_decoder #(
 	input	wire [$clog2(`max(output_width, 2)) - 1:0]	select,
 	output	wire [output_width - 1:0]					out
 );
-if (output_width > 1) begin
-	localparam input_width = $clog2(output_width);
-	wire [2 ** (input_width) - 2:0] mux_tree;
-	assign mux_tree[0] = enable;
-	for (genvar i = 1; i < input_width; ++i) begin: main_tree
-		localparam size = 2 ** (i - 1);
-		assign mux_tree[2 ** i - 1+:2 ** i] = {select[i - 1] ? mux_tree[2 ** i - 2-:size] : '0, select[i - 1] ? '0 : mux_tree[size - 1+:size]};
+genvar i;
+generate
+	if (output_width > 1) begin
+		localparam input_width = $clog2(output_width);
+		wire [2 ** (input_width) - 2:0] mux_tree;
+		assign mux_tree[0] = enable;
+		for (i = 1; i < input_width; ++i) begin: main_tree
+			localparam size = 2 ** (i - 1);
+			assign mux_tree[2 ** i - 1+:2 ** i] = {select[i - 1] ? mux_tree[2 ** i - 2-:size] : '0, select[i - 1] ? '0 : mux_tree[size - 1+:size]};
+		end
+		localparam size = 2 ** (input_width - 1);
+		assign out = {select[input_width - 1] ? mux_tree[size - 1+:output_width - size] : '0, select[input_width - 1] ? '0 : mux_tree[size - 1+:size]};
+	end else begin
+		assign out = select & enable;
 	end
-	localparam size = 2 ** (input_width - 1);
-	assign out = {select[input_width - 1] ? mux_tree[size - 1+:output_width - size] : '0, select[input_width - 1] ? '0 : mux_tree[size - 1+:size]};
-end else begin
-	assign out = select & enable;
-end
+endgenerate
 endmodule
 module decoder #(
 	parameter output_width
@@ -579,39 +606,26 @@ module encoder #(
 localparam output_width = $clog2(input_width);
 genvar i;
 genvar j;
-if (input_width > 1) begin
-	for (i = 0; i < output_width; ++i) begin: encoded_output
-		localparam unit_size = 2 ** i;
-		localparam rest_width = input_width % (2 * unit_size);
-		localparam full_width = (input_width - rest_width) / 2;
-		localparam collector_size = full_width + (rest_width > unit_size ? rest_width % unit_size : 0);
-		wire [collector_size - 1:0] collector;
-		for (j = 0; j < collector_size; j = j + unit_size) begin: selection_union
-			localparam target_start = j * 2 + unit_size;
-			assign collector[`min(collector_size, j + unit_size) - 1:j] = select[`min(input_width, target_start + unit_size) - 1:target_start];
+generate
+	if (input_width > 1) begin
+		for (i = 0; i < output_width; ++i) begin: encoded_output
+			localparam unit_size = 2 ** i;
+			localparam rest_width = input_width % (2 * unit_size);
+			localparam full_width = (input_width - rest_width) / 2;
+			localparam collector_size = full_width + (rest_width > unit_size ? rest_width % unit_size : 0);
+			wire [collector_size - 1:0] collector;
+			for (j = 0; j < collector_size; j = j + unit_size) begin: selection_union
+				localparam target_start = j * 2 + unit_size;
+				assign collector[`min(collector_size, j + unit_size) - 1:j] = select[`min(input_width, target_start + unit_size) - 1:target_start];
+			end
+			if (collector_size > 1) begin
+				assign out[i] = |collector;
+			end else begin
+				assign out[i] = collector;
+			end
 		end
-		if (collector_size > 1) begin
-			assign out[i] = |collector;
-		end else begin
-			assign out[i] = collector;
-		end
+	end else begin
+		assign out = select;
 	end
-end else begin
-	assign out = select;
-end
-endmodule
-/*
-Legacy code, will be reorganised
-*/
-module tri_state_buffer #(
-	parameter word_width,
-	parameter word_length
-) (
-	input	wire [word_length - 1:0][word_width - 1:0] in,
-	input	wire [word_length - 1:0] en,
-	output	wire [word_width - 1:0] out
-);
-for (genvar i = 0; i < word_length; ++i) begin: buffer_unit
-	assign out = en[i] ? in[i] : 'z;
-end
+endgenerate
 endmodule
