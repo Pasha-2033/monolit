@@ -113,8 +113,7 @@ Generation:
 	lower level is smaller fast adders
 */
 module CLAA #(
-	parameter cascade_size = 4,
-	parameter word_width = 4
+	parameter word_width
 ) (
 	input	wire					C_IN,
 	input	wire [word_width - 1:0]	A,
@@ -124,30 +123,12 @@ module CLAA #(
 	output	wire					GG,
 	output	wire					C_OUT
 );
-localparam cascade_num = word_width / cascade_size;
-wire [cascade_size - 1:0] P;
-wire [cascade_size - 1:0] G;
-wire [cascade_size - 1:0] C;
-generate
-	if (cascade_num > 1) begin
-		//creating lowest level
-		CLAA #(.cascade_size(cascade_size), .word_width(cascade_num)) child_CLAA [cascade_size - 1:0] (
-			.C_IN(C[cascade_num - 1:0]),
-			.A(A),
-			.B(B),
-			.R(R),
-			.PG(P),
-			.GG(G)
-		);
-	end else begin
-		//lowest level implementation
-		assign P = A | B;
-		assign G = A & B;
-		assign R = (P & ~G) ^ C;
-	end
-endgenerate
+wire [word_width - 1:0] P = A | B;
+wire [word_width - 1:0] G = A & B;
+wire [word_width - 1:0] C;
+assign R = (P & ~G) ^ C;
 //lookahead implementation
-_LA #(.cascade_size(cascade_size)) lookahead (
+_LA #(.cascade_size(word_width)) lookahead (
 	.C_IN(C_IN),
 	.P(P),
 	.G(G),
@@ -204,21 +185,21 @@ localparam junior_reduction = full_size - word_width;
 localparam csa_units_num = full_size / unit_width;
 wire [csa_units_num - 1:0] ALL_C; //...
 assign C_OUT = ALL_C[csa_units_num - 1]; //...
-RCA_M #(.word_width(unit_width - 1)) junior_adder ( //...
+_CSA_U #(.word_width(unit_width - junior_reduction)) junior_adder ( //...
 	.C_IN(C_IN),
-	.A(A[unit_width - 2:0]), //...
-	.B(B[unit_width - 2:0]), //...
-	.R(R[unit_width - 2:0]), //...
+	.A(A[unit_width - junior_reduction - 1:0]), //...
+	.B(B[unit_width - junior_reduction - 1:0]), //...
+	.R(R[unit_width - junior_reduction - 1:0]), //...
 	.C_OUT(ALL_C[0])
 );
 generate
 	if (csa_units_num > 1) begin
-		_CSA_U #(.word_width(unit_width)) selection_unit [csa_units_num - 2:0] ( //...
-			.C_IN(ALL_C[csa_units_num - 2:0]), //...
-			.A(A[word_width - 1:unit_width - 1]), //...
-			.B(B[word_width - 1:unit_width - 1]), //...
-			.R(R[word_width - 1:unit_width - 2]), //...
-			.C_OUT(ALL_C[csa_units_num - 1:1]) //...
+		_CSA_U #(.word_width(unit_width)) adder [csa_units_num - 2:0] ( //...
+			.C_IN(ALL_C[csa_units_num - 2:0]),
+			.A(A[word_width - 1:unit_width - junior_reduction]), //...
+			.B(B[word_width - 1:unit_width - junior_reduction]), //...
+			.R(R[word_width - 1:unit_width - junior_reduction]), //...
+			.C_OUT(ALL_C[csa_units_num - 1:1])
 		);
 	end
 endgenerate

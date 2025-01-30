@@ -1,6 +1,7 @@
 `include "utils.sv"
 `include "_tree_decoder.sv"
 `include "CLAA.sv"
+`include "CSA_S.sv"
 `include "fast_comparator.sv"
 `include "polyshift_r.sv"
 `include "polyshift_l.sv"
@@ -8,7 +9,8 @@
 `timescale 1ps/1ps
 module utils_tb;
 task__tree_decoder #(.output_width(12)) _td();
-task_CLAA #(.cascade_size(4), .word_width(16)) claa();
+task_CLAA #(.word_width(16)) claa();
+task_CSA_S #(.word_width(16), .unit_width(4)) csa_s();
 task_fast_comparator #(.word_width(7)) fc();
 task_polyshift_r #(.word_width(8)) psr();
 task_polyshift_l #(.word_width(8)) psl();
@@ -23,6 +25,10 @@ initial begin
 	$display("CLAA task:");
 	repeat (10) begin
 		claa.run($urandom, $urandom);
+	end
+	$display("CSA_S task:");
+	repeat (10) begin
+		csa_s.run($urandom, $urandom);
 	end
 	$display("fast_comparator task:");
 	fc.run(2, 1);
