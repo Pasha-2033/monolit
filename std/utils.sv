@@ -180,26 +180,37 @@ module CSA_S #(
 	output	wire [word_width - 1:0]	R,
 	output	wire 					C_OUT
 );
-localparam full_size = 2 ** $clog2(word_width);
-localparam junior_reduction = full_size - word_width;
-localparam csa_units_num = full_size / unit_width;
-wire [csa_units_num - 1:0] ALL_C; //...
-assign C_OUT = ALL_C[csa_units_num - 1]; //...
-_CSA_U #(.word_width(unit_width - junior_reduction)) junior_adder ( //...
-	.C_IN(C_IN),
-	.A(A[unit_width - junior_reduction - 1:0]), //...
-	.B(B[unit_width - junior_reduction - 1:0]), //...
-	.R(R[unit_width - junior_reduction - 1:0]), //...
-	.C_OUT(ALL_C[0])
-);
+localparam full_units_num = word_width / unit_width;
+localparam junior_unit_width = word_width % unit_width;
+wire [full_units_num:0] ALL_C;
+assign C_OUT = ALL_C[full_units_num];
 generate
-	if (csa_units_num > 1) begin
-		_CSA_U #(.word_width(unit_width)) adder [csa_units_num - 2:0] ( //...
-			.C_IN(ALL_C[csa_units_num - 2:0]),
-			.A(A[word_width - 1:unit_width - junior_reduction]), //...
-			.B(B[word_width - 1:unit_width - junior_reduction]), //...
-			.R(R[word_width - 1:unit_width - junior_reduction]), //...
-			.C_OUT(ALL_C[csa_units_num - 1:1])
+	if (junior_unit_width > 2) begin
+		_CSA_U #(.word_width(junior_unit_width)) junior_adder (
+			.C_IN(C_IN),
+			.A(A[junior_unit_width - 1:0]),
+			.B(B[junior_unit_width - 1:0]),
+			.R(R[junior_unit_width - 1:0]),
+			.C_OUT(ALL_C[0])
+		);
+	end	else if (junior_unit_width) begin
+		RCA_M #(.word_width(junior_unit_width)) junior_adder (
+			.C_IN(C_IN),
+			.A(A[junior_unit_width - 1:0]),
+			.B(B[junior_unit_width - 1:0]),
+			.R(R[junior_unit_width - 1:0]),
+			.C_OUT(ALL_C[0])
+		);
+	end else begin
+		assign ALL_C[0] = C_IN;
+	end
+	if (full_units_num) begin
+		_CSA_U #(.word_width(unit_width)) adder [full_units_num - 1:0] (
+			.C_IN(ALL_C[full_units_num - 1:0]),
+			.A(A[word_width - 1:junior_unit_width]),
+			.B(B[word_width - 1:junior_unit_width]),
+			.R(R[word_width - 1:junior_unit_width]),
+			.C_OUT(ALL_C[full_units_num:1])
 		);
 	end
 endgenerate

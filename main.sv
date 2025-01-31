@@ -17,7 +17,7 @@ CLAA #(.word_width(32)) claa (
 	.A(D_IN[15:0]), 
 	.B(D_IN[31:16])
 );
-CSA_S #(.unit_width(4), .word_width(15)) csa_s (
+CSA_S #(.unit_width(5), .word_width(15)) csa_s (
 	.C_IN(C_IN), 
 	.A(D_IN[15:0]), 
 	.B(D_IN[31:16])

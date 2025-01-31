@@ -10,7 +10,7 @@
 module utils_tb;
 task__tree_decoder #(.output_width(12)) _td();
 task_CLAA #(.word_width(16)) claa();
-task_CSA_S #(.word_width(16), .unit_width(4)) csa_s();
+task_CSA_S #(.word_width(12), .unit_width(5)) csa_s();
 task_fast_comparator #(.word_width(7)) fc();
 task_polyshift_r #(.word_width(8)) psr();
 task_polyshift_l #(.word_width(8)) psl();
