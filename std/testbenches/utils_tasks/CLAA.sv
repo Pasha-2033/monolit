@@ -1,19 +1,19 @@
 module task_CLAA #(
-	parameter word_width
+	parameter WORD_WIDTH
 );
-logic [word_width - 1:0] A;
-logic [word_width - 1:0] B;
-wire [word_width - 1:0] R;
+logic [WORD_WIDTH - 1:0] A;
+logic [WORD_WIDTH - 1:0] B;
+wire [WORD_WIDTH - 1:0] R;
 wire C_OUT;
-CLAA #(.word_width(word_width)) claa (
-	.C_IN('0),
-	.A(A),
-	.B(B),
-	.R(R),
+CLAA #(.WORD_WIDTH(WORD_WIDTH)) claa (
+	.c_i('0),
+	.a_i(A),
+	.b_i(B),
+	.r_o(R),
 	//ingore technical outupts P & G
-	.C_OUT(C_OUT)
+	.c_o(C_OUT)
 );
-task run(input [word_width - 1:0] A_VAL, input [word_width - 1:0] B_VAL);
+task run(input [WORD_WIDTH - 1:0] A_VAL, input [WORD_WIDTH - 1:0] B_VAL);
 	begin
 		A = A_VAL;
 		B = B_VAL;

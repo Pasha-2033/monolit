@@ -1,27 +1,31 @@
 `include "utils.sv"
-`include "_tree_decoder.sv"
+`include "tree_decoder.sv"
 `include "CLAA.sv"
 `include "CSA_S.sv"
 `include "fast_comparator.sv"
 `include "polyshift_r.sv"
 `include "polyshift_l.sv"
 `include "RCA_M.sv"
+`include "screening_by_junior.sv"
+`include "screening_by_senior.sv"
 `timescale 1ps/1ps
 module utils_tb;
-task__tree_decoder #(.output_width(12)) _td();
-task_CLAA #(.word_width(16)) claa();
-task_CSA_S #(.word_width(12), .unit_width(5)) csa_s();
-task_fast_comparator #(.word_width(7)) fc();
-task_polyshift_r #(.word_width(8)) psr();
-task_polyshift_l #(.word_width(8)) psl();
-task_RCA_M #(.word_width(16)) rca_m();
+task_tree_decoder #(.OUTPUT_WIDTH(12)) td();
+task_CLAA #(.WORD_WIDTH(16)) claa();
+task_CSA_S #(.WORD_WIDTH(12), .UNIT_WIDTH(5)) csa_s();
+task_fast_comparator #(.WORD_WIDTH(7)) fc();
+task_polyshift_r #(.WORD_WIDTH(8)) psr();
+task_polyshift_l #(.WORD_WIDTH(8)) psl();
+task_RCA_M #(.WORD_WIDTH(16)) rca_m();
+task_screening_by_junior #(.WORD_WIDTH(8)) sbj();
+task_screening_by_senior #(.WORD_WIDTH(8)) sbs();
 initial begin
 	$display("_tree_decoder task:");
-	_td.run(0);
-	_td.run(1);
-	_td.run(2);
-	_td.run(10);
-	_td.run(11);
+	td.run(0);
+	td.run(1);
+	td.run(2);
+	td.run(10);
+	td.run(11);
 	$display("CLAA task:");
 	repeat (10) begin
 		claa.run($urandom, $urandom);
@@ -45,6 +49,14 @@ initial begin
 	$display("RCA_M task:");
 	repeat (10) begin
 		rca_m.run($urandom, $urandom);
+	end
+	$display("screening_by_junior task:");
+	repeat (10) begin
+		sbj.run($urandom);
+	end
+	$display("screening_by_senior task:");
+	repeat (10) begin
+		sbs.run($urandom);
 	end
 end
 endmodule

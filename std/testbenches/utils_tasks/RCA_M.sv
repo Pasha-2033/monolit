@@ -1,18 +1,18 @@
 module task_RCA_M #(
-	parameter word_width
+	parameter WORD_WIDTH
 );
-logic [word_width - 1:0] A;
-logic [word_width - 1:0] B;
-wire [word_width - 1:0] R;
+logic [WORD_WIDTH - 1:0] A;
+logic [WORD_WIDTH - 1:0] B;
+wire [WORD_WIDTH - 1:0] R;
 wire C_OUT;
-RCA_M #(.word_width(word_width)) rca_m (
-	.C_IN('0),
-	.A(A),
-	.B(B),
-	.R(R),
-	.C_OUT(C_OUT)
+RCA_M #(.WORD_WIDTH(WORD_WIDTH)) rca_m (
+	.c_i('0),
+	.a_i(A),
+	.b_i(B),
+	.r_o(R),
+	.c_o(C_OUT)
 );
-task run(input [word_width - 1:0] A_VAL, input [word_width - 1:0] B_VAL);
+task run(input [WORD_WIDTH - 1:0] A_VAL, input [WORD_WIDTH - 1:0] B_VAL);
 	begin
 		A = A_VAL;
 		B = B_VAL;

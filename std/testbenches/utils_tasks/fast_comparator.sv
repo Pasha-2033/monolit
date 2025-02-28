@@ -1,17 +1,17 @@
 module task_fast_comparator #(
-	parameter word_width
+	parameter WORD_WIDTH
 );
 integer errors;
-logic [word_width - 1:0] A;
-logic [word_width - 1:0] B;
+logic [WORD_WIDTH - 1:0] A;
+logic [WORD_WIDTH - 1:0] B;
 wire above, below;
-fast_comparator #(.word_width(word_width)) fc (
-	.A(A),
-	.B(B),
-	.above(above),
-	.below(below)
+fast_comparator #(.WORD_WIDTH(WORD_WIDTH)) fc (
+	.a_i(A),
+	.b_i(B),
+	.above_o(above),
+	.below_o(below)
 );
-task run(input [word_width - 1:0] A_VAL, input [word_width - 1:0] B_VAL);
+task run(input [WORD_WIDTH - 1:0] A_VAL, input [WORD_WIDTH - 1:0] B_VAL);
 	begin		
 		A = A_VAL;
 		B = B_VAL;
