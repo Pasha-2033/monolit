@@ -161,5 +161,8 @@ fast_comparator #(.WORD_WIDTH(4)) fc (
 	.b_i(D_IN[31:16])
 );
 
-
+//SPI
+SPI #(.word_width(8), .SS_width(4)) spi (
+	.clk(clk)
+);
 endmodule

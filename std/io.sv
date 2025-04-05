@@ -102,9 +102,9 @@ module SPI #(
 	output	wire										SD_OUT,		//MISO - if slave else - MOSI
 	output	wire	[SS_width - 1:0]					SS_OUT		//slave selection
 );
-decoder_c #(.output_width(SS_width)) SS_decoder (
-	.enable(SSE),
-	.select(SSV),
+tree_decoder #(.OUTPUT_WIDTH(SS_width)) SS_decoder (
+	.enable_i(SSE),
+	.select_i(SSV),
 	.out(SS_OUT)
 );
 assign SD_OUT = D_OUT[word_width - 1];
