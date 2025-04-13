@@ -6,8 +6,8 @@ wire [WORD_WIDTH - 1:0] R;
 wire C_OUT;
 screening_by_senior #(.WORD_WIDTH(WORD_WIDTH)) sbj (
 	.c_i('0),
-	.in(A),
-	.out(R),
+	.data_i(A),
+	.data_o(R),
 	.c_o(C_OUT)
 );
 task run(input [WORD_WIDTH - 1:0] A_VAL);

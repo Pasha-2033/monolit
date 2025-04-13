@@ -10,8 +10,8 @@ Ports:
 	count			- enable counting
 	load			- enable loading
 	arst_i			- asynchronous reset
-	d_i				- data for loading
-	d_o				- counter value
+	data_i			- data for loading
+	data_o			- counter value
 	will_overflow_o	- shows if next count will be with overflow
 Generation:
 	NONE
@@ -31,22 +31,22 @@ module counter #(
 	input	wire					load_i,
 	input	wire					arst_i,
 
-	input	wire [WORD_WIDTH - 1:0]	d_i,
-	output	reg  [WORD_WIDTH - 1:0]	d_o,
+	input	wire [WORD_WIDTH - 1:0]	data_i,
+	output	reg  [WORD_WIDTH - 1:0]	data_o,
 
 	output	wire					will_overflow_o
 );
-wire [WORD_WIDTH - 1:0] load_flow	= {load_flow[WORD_WIDTH - 2:0] & ~d_o[WORD_WIDTH - 2:0], count_i & load_i};
-wire [WORD_WIDTH - 1:0] count_flow	= {count_flow[WORD_WIDTH - 2:0] & d_o[WORD_WIDTH - 2:0], ~load_flow[0]};
+wire [WORD_WIDTH - 1:0] load_flow	= {load_flow[WORD_WIDTH - 2:0] & ~data_o[WORD_WIDTH - 2:0], count_i & load_i};
+wire [WORD_WIDTH - 1:0] count_flow	= {count_flow[WORD_WIDTH - 2:0] & data_o[WORD_WIDTH - 2:0], ~load_flow[0]};
 
-assign will_overflow_o = &(load_flow[0] ? ~d_o : d_o);
+assign will_overflow_o = &(load_flow[0] ? ~data_o : data_o);
 
 always @(posedge clk_i or posedge arst_i) begin
 	if (arst_i) begin
-		d_o <= '0;
+		data_o <= '0;
 	end
 	else if (count_i | load_i) begin
-		d_o <= ~count_i & load_i ? d_i : {d_o[WORD_WIDTH - 1:1] ^ (count_flow[WORD_WIDTH - 1:1] | load_flow[WORD_WIDTH - 1:1]), ~d_o[0]};
+		data_o <= ~count_i & load_i ? data_i : {data_o[WORD_WIDTH - 1:1] ^ (count_flow[WORD_WIDTH - 1:1] | load_flow[WORD_WIDTH - 1:1]), ~data_o[0]};
 	end
 end
 endmodule

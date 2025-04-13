@@ -7,7 +7,7 @@ Parameters:
 	INPUT_WIDTH - number of select bits (also defines width of out)
 Ports:
 	select_i	- value to encode
-	out			- encoded value
+	data_o		- encoded value
 Generation:
 	Creates collectors and assings them to uotput
 Additional comments:
@@ -18,7 +18,7 @@ module encoder #(
 	parameter INPUT_WIDTH
 ) (
 	input	wire	[INPUT_WIDTH - 1:0]						select_i,
-	output	wire	[$clog2(`max(INPUT_WIDTH, 2)) - 1:0]	out
+	output	wire	[$clog2(`max(INPUT_WIDTH, 2)) - 1:0]	data_o
 );
 localparam OUTPUT_WIDTH = $clog2(INPUT_WIDTH);
 genvar i;
@@ -38,15 +38,15 @@ generate
 			end
 
 			if (COLLECTOR_SIZE > 1) begin
-				assign out[i] = |collector;
+				assign data_o[i] = |collector;
 			end
 			else begin
-				assign out[i] = collector;
+				assign data_o[i] = collector;
 			end
 		end
 	end
 	else begin
-		assign out = select_i;
+		assign data_o = select_i;
 	end
 endgenerate
 endmodule

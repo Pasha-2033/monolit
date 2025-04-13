@@ -8,7 +8,7 @@ Parameters:
 Ports:
 	enable_i		- enable output
 	select_i_i		- select_i decoding value
-	out				- decoding result
+	data_o			- decoding result
 Generation:
 	Creates MUX tree layer by layer
 Additional comments:
@@ -21,7 +21,7 @@ module tree_decoder #(
 	input	wire										enable_i,
 	input	wire [$clog2(`max(OUTPUT_WIDTH, 2)) - 1:0]	select_i,
 
-	output	wire [OUTPUT_WIDTH - 1:0]					out
+	output	wire [OUTPUT_WIDTH - 1:0]					data_o
 );
 genvar i;
 generate
@@ -37,10 +37,10 @@ generate
 		end
 
 		localparam SIZE = 2 ** (INPUT_WIDTH - 1);
-		assign out = {select_i[INPUT_WIDTH - 1] ? mux_tree[SIZE - 1+:OUTPUT_WIDTH - SIZE] : '0, select_i[INPUT_WIDTH - 1] ? '0 : mux_tree[SIZE - 1+:SIZE]};
+		assign data_o = {select_i[INPUT_WIDTH - 1] ? mux_tree[SIZE - 1+:OUTPUT_WIDTH - SIZE] : '0, select_i[INPUT_WIDTH - 1] ? '0 : mux_tree[SIZE - 1+:SIZE]};
 	end
 	else begin
-		assign out = select_i & enable_i;
+		assign data_o = select_i & enable_i;
 	end
 endgenerate
 endmodule

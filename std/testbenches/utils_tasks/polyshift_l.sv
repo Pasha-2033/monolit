@@ -7,11 +7,11 @@ SHIFT_TYPE _type;
 logic [$clog2(WORD_WIDTH) - 1:0] _size;
 wire [WORD_WIDTH - 1:0] D_OUT;
 polyshift_l #(.WORD_WIDTH(WORD_WIDTH)) psr (
-	.d_i(D_IN),
+	.data_i(D_IN),
 	.c_i(C_IN),
 	.shift_size_i(_size[2:0]),
 	.shift_type_i(_type),
-	.d_o(D_OUT)
+	.data_o(D_OUT)
 );
 //check values
 wire [WORD_WIDTH * 2 - 1:0] rol = {D_IN, D_IN};

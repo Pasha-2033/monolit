@@ -116,12 +116,12 @@ counter_backward #(.WORD_WIDTH(4)) ccsb (
 polyshift_l_cf #(.WORD_WIDTH(8)) psl_cf (
 	.cf_i(D_IN[0]),
 	.shift_size_i(D_IN[3:1]),
-	.word_i(D_IN[11:4])
+	.data_i(D_IN[11:4])
 );
 polyshift_r_cf #(.WORD_WIDTH(8)) psr_cf (
 	.cf_i(D_IN[0]),
 	.shift_size_i(D_IN[3:1]),
-	.word_i(D_IN[11:4])
+	.data_i(D_IN[11:4])
 );
 wire [7:0] D = D_IN[7:0];
 parameter C = 1'b0; 
@@ -129,24 +129,24 @@ wire [6:0] DCR = D[6:0];
 wire [6:0] DCL = D[7:1];
 polyshift_l #(.WORD_WIDTH(8)) psl (
 	.c_i(`RCL(DCL, C)),
-	.d_i(D),
+	.data_i(D),
 	.shift_size_i(D_IN[10:8]),
 	.shift_type_i(D_IN[12:11])
 );
 polyshift_r #(.WORD_WIDTH(8)) psr (
 	.c_i(`RCR(DCR, C)),
-	.d_i(D),
+	.data_i(D),
 	.shift_size_i(D_IN[10:8]),
 	.shift_type_i(D_IN[12:11])
 );
 //wire management
 screening_by_junior #(.WORD_WIDTH(8)) sbj (
 	.c_i(D_IN[0]),
-	.in(D_IN[8:1])
+	.data_i(D_IN[8:1])
 );
 screening_by_senior #(.WORD_WIDTH(8)) sbs (
 	.c_i(D_IN[0]),
-	.in(D_IN[8:1])
+	.data_i(D_IN[8:1])
 );
 encoder #(.INPUT_WIDTH(5)) enc (
 	.select_i(D_IN[4:0])

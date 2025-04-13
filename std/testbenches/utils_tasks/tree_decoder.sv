@@ -8,7 +8,7 @@ wire [OUTPUT_WIDTH - 1:0] out;
 tree_decoder #(.OUTPUT_WIDTH(OUTPUT_WIDTH)) _td (
 	.enable_i('1),
 	.select_i(S),
-	.out(out)
+	.data_o(out)
 );
 task run(input [$clog2(`max(OUTPUT_WIDTH, 2)) - 1:0] S_VAL);
 	begin		

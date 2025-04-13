@@ -20,7 +20,7 @@ module SPI #(
 tree_decoder #(.OUTPUT_WIDTH(SS_width)) SS_decoder (
 	.enable_i(SSE),
 	.select_i(SSV),
-	.out(SS_OUT)
+	.data_o(SS_OUT)
 );
 assign SD_OUT = D_OUT[word_width - 1:word_width - send_width];
 wire SPI_clk = SE ^ SCLK;

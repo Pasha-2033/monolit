@@ -9,8 +9,8 @@ Ports:
 	clk_i			- clock
 	action_i		- count/load
 	arst_i			- asynchronous reset
-	d_i				- data for loading
-	d_o				- counter value
+	data_i			- data for loading
+	data_o			- counter value
 	will_overflow_o	- shows if next count will be with overflow
 Generation:
 	NONE
@@ -27,21 +27,21 @@ module counter_forward #(
 	input	wire					action_i,
 	input	wire					arst_i,
 
-	input	wire [WORD_WIDTH - 1:0]	d_i,
-	output	reg  [WORD_WIDTH - 1:0]	d_o,
+	input	wire [WORD_WIDTH - 1:0]	data_i,
+	output	reg  [WORD_WIDTH - 1:0]	data_o,
 
 	output	wire					will_overflow_o
 );
-wire [WORD_WIDTH - 2:0] count_flow = {count_flow[WORD_WIDTH - 3:0] & d_o[WORD_WIDTH - 2:1], d_o[0]};
+wire [WORD_WIDTH - 2:0] count_flow = {count_flow[WORD_WIDTH - 3:0] & data_o[WORD_WIDTH - 2:1], data_o[0]};
 
-assign will_overflow_o = &d_o;
+assign will_overflow_o = &data_o;
 
 always_ff @(posedge clk_i or posedge arst_i) begin
 	if (arst_i) begin
-		d_o <= '0;
+		data_o <= '0;
 	end 
 	else begin
-		d_o <= action_i ? d_i : {d_o[WORD_WIDTH - 1:1] ^ count_flow, ~d_o[0]};
+		data_o <= action_i ? data_i : {data_o[WORD_WIDTH - 1:1] ^ count_flow, ~data_o[0]};
 	end
 end
 endmodule
