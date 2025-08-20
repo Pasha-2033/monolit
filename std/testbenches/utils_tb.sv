@@ -8,6 +8,9 @@
 `include "RCA_M.sv"
 `include "screening_by_junior.sv"
 `include "screening_by_senior.sv"
+`include "counter.sv"
+`include "counter_forward.sv"
+`include "counter_backward.sv"
 `timescale 1ps/1ps
 module utils_tb;
 task_tree_decoder #(.OUTPUT_WIDTH(12)) td();
@@ -19,6 +22,9 @@ task_polyshift_l #(.WORD_WIDTH(8)) psl();
 task_RCA_M #(.WORD_WIDTH(16)) rca_m();
 task_screening_by_junior #(.WORD_WIDTH(8)) sbj();
 task_screening_by_senior #(.WORD_WIDTH(8)) sbs();
+task_counter #(.WORD_WIDTH(8)) tcc();
+task_counter_forward #(.WORD_WIDTH(8)) tcf();
+task_counter_backward #(.WORD_WIDTH(8)) tcb();
 initial begin
 	$display("_tree_decoder task:");
 	td.run(0);
@@ -58,5 +64,11 @@ initial begin
 	repeat (10) begin
 		sbs.run($urandom);
 	end
+	$display("counter task:");
+	tcc.run();
+	$display("counter forward task:");
+	tcf.run();
+	$display("counter backward task:");
+	tcb.run();
 end
 endmodule
