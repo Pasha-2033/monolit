@@ -67,10 +67,16 @@ set_global_assignment -name VHDL_INPUT_VERSION VHDL_1993
 set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
 set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
 set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
-set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/blocks/arithmetic.sv
-set_global_assignment -name SYSTEMVERILOG_FILE core/_FLAGS_PARAMS.sv
-set_global_assignment -name SYSTEMVERILOG_FILE core/_ALU.sv
-set_global_assignment -name SYSTEMVERILOG_FILE core/_RF.sv
+set_global_assignment -name VERILOG_MACRO "STD_UTILS=<None>"
+set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/blocks/right_shift_block.sv
+set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/blocks/logic_block.sv
+set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/blocks/left_shift_block.sv
+set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/blocks/arithmetic_block.sv
+set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/units/right_shift_unit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/units/logic_unit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/units/left_shift_unit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/units/arithmetic_unit.sv
+set_global_assignment -name SYSTEMVERILOG_FILE core/RF.sv
 set_global_assignment -name SYSTEMVERILOG_FILE std/ui.sv -library std
 set_global_assignment -name SYSTEMVERILOG_FILE std/utils.sv -library std
 set_global_assignment -name SYSTEMVERILOG_FILE std/io.sv -library std

@@ -1,174 +1,132 @@
 module main (
 	input wire clk,
-	input wire [31:0] D_IN,
-	output wire [2 ** 5 - 1:0] D_OUT
-);
 
-//Fast adder
-wire P;
-wire G;
-wire C_IN;
-/*
-CLAA #(.word_width(32)) claa (
-	.C_IN(C_IN), 
-	.A(D_IN[15:0]), 
-	.B(D_IN[31:16])
+	//RF
+	input	wire				arst,
+	input	wire	[3:0][2:0]	select_a,
+	input	wire	[3:0][2:0]	select_b,
+	input	wire	[1:0][2:0]	select_c,
+	input	wire	[3:0][2:0]	select_r,
+	input	wire	[3:0]		enable_writing,
+	input	wire	[3:0][7:0]	RF_D_IN,
+	output	wire	[3:0][7:0]	RF_A,
+	output	wire	[3:0][7:0]	RF_B,
+	output	wire	[1:0][7:0]	RF_C,
+	//Arithmetic block
+	input	wire	[1:0]	ab_op_i,
+	input	wire	[7:0]	ab_a_i,
+	input	wire	[7:0]	ab_b_i,
+	input	wire	[7:0]	ab_not_b_i,
+	output	wire	[7:0]	ab_r_o,
+	input	wire			ab_cf_i,	//carry flag (int)
+	output	wire			ab_cf_o,	//carry flag (out)
+	output	wire			ab_zf_o,	//zero flag
+	output	wire			ab_of_o,	//overflow flag
+	output	wire			ab_pf_o,	//parity flag
+	output	wire			ab_sf_o,	//sign flag
+	//Logic block
+	input	wire	[1:0]	lb_op_i,
+	input	wire	[7:0]	lb_a_i,
+	input	wire	[7:0]	lb_b_i,
+	input	wire	[7:0]	lb_not_b_i,
+	output	wire	[7:0]	lb_r_o,
+	output	wire			lb_cf_o,	//carry flag (out)
+	output	wire			lb_zf_o,	//zero flag
+	output	wire			lb_of_o,	//overflow flag
+	output	wire			lb_pf_o,	//parity flag
+	output	wire			lb_sf_o,		//sign flag
+	//Left shift
+	input	wire	[1:0]	ls_op_i,
+	input	wire	[7:0]	ls_a_i,
+	input	wire	[7:0]	ls_b_i,
+	input	wire	[7:0]	ls_c_i,
+	output	wire	[7:0]	ls_r_o,
+	input	wire			ls_cf_i,	//carry flag (in)
+	output	wire			ls_cf_o,	//carry flag (out)
+	output	wire			ls_zf_o,	//zero flag
+	output	wire			ls_of_o,	//overflow flag
+	output	wire			ls_pf_o,	//parity flag
+	output	wire			ls_sf_o,		//sign flag
+	//Right shift
+	input	wire	[1:0]	rs_op_i,
+	input	wire	[7:0]	rs_a_i,
+	input	wire	[7:0]	rs_b_i,
+	input	wire	[7:0]	rs_c_i,
+	output	wire	[7:0]	rs_r_o,
+	input	wire			rs_cf_i,	//carry flag (in)
+	output	wire			rs_cf_o,	//carry flag (out)
+	output	wire			rs_zf_o,	//zero flag
+	output	wire			rs_of_o,	//overflow flag
+	output	wire			rs_pf_o,	//parity flag
+	output	wire			rs_sf_o		//sign flag
 );
-CSA_S #(.unit_width(5), .word_width(15)) csa_s (
-	.C_IN(C_IN), 
-	.A(D_IN[15:0]), 
-	.B(D_IN[31:16])
+//RF
+RF #(.WORD_WIDTH(8), .ADDRESS_WIDTH(3), .IP_OFFSET(2)) rf (
+	.clk_i(clk),
+	.arst_i(arst),
+	.select_a_i(select_a),
+	.select_b_i(select_b),
+	.select_c_i(select_c),
+	.select_r_i(select_r),
+	.data_i(RF_D_IN),
+	.enable_writing_i(enable_writing),
+	.a_o(RF_A),
+	.b_o(RF_B),
+	.c_o(RF_C)
 );
-//Fast comparator
-fast_comparator #(.word_width(1)) fc (
-	.A(D_IN[15:0]),
-	.B(D_IN[31:16])
+//Arithmetic block
+arithmetic_block #(.WORD_WIDTH(8)) ab (
+	.op_i(ab_op_i),
+	.a_i(ab_a_i),
+	.b_i(ab_b_i),
+	.not_b_i(ab_not_b_i),
+	.r_o(ab_r_o),
+	.cf_i(ab_cf_i),
+	.cf_o(ab_cf_o),
+	.zf_o(ab_zf_o),
+	.of_o(ab_of_o),
+	.pf_o(ab_pf_o),
+	.sf_o(ab_sf_o)	
 );
-//screening
-screening_by_junior #(.word_width(8)) sbj (
-	.C_IN(D_IN[0]),
-	.IN(D_IN[8:1])
+//Logic block
+logic_block #(.WORD_WIDTH(8)) lb (
+	.op_i(lb_op_i),
+	.a_i(lb_a_i),
+	.b_i(lb_b_i),
+	.not_b_i(lb_not_b_i),
+	.r_o(lb_r_o),
+	.cf_o(lb_cf_o),
+	.zf_o(lb_zf_o),
+	.of_o(lb_of_o),
+	.pf_o(lb_pf_o),
+	.sf_o(lb_sf_o)
 );
-screening_by_senior #(.word_width(8)) sbs (
-	.C_IN(D_IN[0]),
-	.IN(D_IN[8:1])
+//Left shift
+left_shift_block #(.WORD_WIDTH(8)) lsb (
+	.op_i(ls_op_i),
+	.a_i(ls_a_i),
+	.b_i(ls_b_i),
+	.c_i(ls_c_i),
+	.r_o(ls_r_o),
+	.cf_i(ls_cf_i),
+	.cf_o(ls_cf_o),
+	.zf_o(ls_zf_o),
+	.of_o(ls_of_o),
+	.pf_o(ls_pf_o),
+	.sf_o(ls_sf_o)
 );
-//IIC
-IIC #(.word_width(8)) iic (
-	.clk(clk)
-);
-//SPI
-SPI #(.word_width(8), .SS_width(1)) spi (
-	.clk(clk)
-);
-//Counter (complex)
-counter #(.word_width(8)) cc (
-	.clk(clk)
-);
-counter_forward #(.word_width(8)) ccsf (
-	.clk(clk)
-);
-counter_backward #(.word_width(8)) ccsb (
-	.clk(clk)
-);
-//decoder
-_array_decoder #(.output_width(2 ** 5)) dec (
-	.select(D_IN[12:0]),
-	.out(D_OUT)
-);
-_tree_decoder #(.output_width(12)) dec2 (
-	.select(D_IN[3:0])
-);
-//encoder
-encoder #(.input_width(5)) enc (
-	.select(D_IN[4:0])
-);
-encoder #(.input_width(17)) enc2 (
-	.select(D_IN[16:0])
-);
-//shifts
-wire [7:0] D = D_IN[7:0];
-parameter C = 1'b0; 
-wire [6:0] DCR = D[6:0];
-wire [6:0] DCL = D[7:1];
-polyshift_l #(.word_width(8)) psl (
-	.C_IN(`RCL(DCL, C)),
-	.D_IN(D),
-	.shift_size(D_IN[10:8]),
-	.shift_type(D_IN[12:11])
-);
-polyshift_r #(.word_width(8)) psr (
-	.C_IN(`RCR(DCR, C)),
-	.D_IN(D),
-	.shift_size(D_IN[10:8]),
-	.shift_type(D_IN[12:11])
-);
-
-*/
-
-//adders
-RCA_M #(.WORD_WIDTH(16)) rca_m (
-	.c_i(C_IN),
-	.a_i(D_IN[15:0]),
-	.b_i(D_IN[31:16])
-);
-CLAA #(.WORD_WIDTH(16)) claa (
-	.c_i(C_IN), 
-	.a_i(D_IN[15:0]), 
-	.b_i(D_IN[31:16])
-);
-CSA_S #(.UNIT_WIDTH(5), .WORD_WIDTH(15)) csa_s (
-	.c_i(C_IN), 
-	.a_i(D_IN[15:0]), 
-	.b_i(D_IN[31:16])
-);
-//memory
-counter #(.WORD_WIDTH(4)) cc (
-	.clk_i(clk)
-);
-counter_forward #(.WORD_WIDTH(4)) ccsf (
-	.clk_i(clk)
-);
-counter_backward #(.WORD_WIDTH(4)) ccsb (
-	.clk_i(clk)
-);
-//shifts
-polyshift_l_cf #(.WORD_WIDTH(8)) psl_cf (
-	.cf_i(D_IN[0]),
-	.shift_size_i(D_IN[3:1]),
-	.data_i(D_IN[11:4])
-);
-polyshift_r_cf #(.WORD_WIDTH(8)) psr_cf (
-	.cf_i(D_IN[0]),
-	.shift_size_i(D_IN[3:1]),
-	.data_i(D_IN[11:4])
-);
-wire [7:0] D = D_IN[7:0];
-parameter C = 1'b0; 
-wire [6:0] DCR = D[6:0];
-wire [6:0] DCL = D[7:1];
-polyshift_l #(.WORD_WIDTH(8)) psl (
-	.c_i(`RCL(DCL, C)),
-	.data_i(D),
-	.shift_size_i(D_IN[10:8]),
-	.shift_type_i(D_IN[12:11])
-);
-polyshift_r #(.WORD_WIDTH(8)) psr (
-	.c_i(`RCR(DCR, C)),
-	.data_i(D),
-	.shift_size_i(D_IN[10:8]),
-	.shift_type_i(D_IN[12:11])
-);
-//wire management
-screening_by_junior #(.WORD_WIDTH(8)) sbj (
-	.c_i(D_IN[0]),
-	.data_i(D_IN[8:1])
-);
-screening_by_senior #(.WORD_WIDTH(8)) sbs (
-	.c_i(D_IN[0]),
-	.data_i(D_IN[8:1])
-);
-encoder #(.INPUT_WIDTH(5)) enc (
-	.select_i(D_IN[4:0])
-);
-tree_decoder #(.OUTPUT_WIDTH(12)) tdec (
-	.enable_i(D_IN[0]),
-	.select_i(D_IN[4:1])
-);
-//comparator
-fast_comparator #(.WORD_WIDTH(4)) fc (
-	.a_i(D_IN[15:0]),
-	.b_i(D_IN[31:16])
-);
-
-//SPI
-SPI #(.word_width(8), .send_width(4), .SS_width(4)) spi (
-	.clk(clk)
-);
-_RF fr (
-	.clk_i(clk)
-);
-_ALU alu (
-	.a_i(D_IN)
+//Right shift
+right_shift_block #(.WORD_WIDTH(8)) rsb (
+	.op_i(rs_op_i),
+	.a_i(rs_a_i),
+	.b_i(rs_b_i),
+	.c_i(rs_c_i),
+	.r_o(rs_r_o),
+	.cf_i(rs_cf_i),
+	.cf_o(rs_cf_o),
+	.zf_o(rs_zf_o),
+	.of_o(rs_of_o),
+	.pf_o(rs_pf_o),
+	.sf_o(rs_sf_o)
 );
 endmodule

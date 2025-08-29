@@ -28,7 +28,7 @@ module CLAA #(
 	output	wire [WORD_WIDTH - 1:0]	r_o,
 
 	output	wire					pg_o,
-	output	wire					gg_0,
+	output	wire					gg_o,
 
 	output	wire					c_o
 );
@@ -45,6 +45,6 @@ _LA #(.CASCADE_SIZE(WORD_WIDTH)) lookahead (
 	.g_i	(g),
 	.c_o	({c_o, c}),
 	.pg_o	(pg_o),
-	.gg_o	(gg_0)
+	.gg_o	(gg_o)
 );
 endmodule
