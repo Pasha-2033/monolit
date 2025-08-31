@@ -23,7 +23,7 @@ polyshift_r #(.WORD_WIDTH(WORD_WIDTH)) psr (
 polyshift_r_cf #(.WORD_WIDTH(WORD_WIDTH)) psr_cf (
 	.cf_i(cf_i),
 	.shift_size_i(shift_size),
-	.data_i(a_i),
+	.data_i(a_i[WORD_WIDTH - 2:0]),
 	.cf_o(cf_o)
 );
 endmodule

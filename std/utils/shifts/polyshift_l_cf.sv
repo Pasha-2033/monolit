@@ -28,7 +28,7 @@ module polyshift_l_cf #(
 );
 wire [WORD_WIDTH - 2:0] data_reversed;
 
-bit_reverse #(.WORD_WIDTH(WORD_WIDTH)) reverse_in (
+bit_reverse #(.WORD_WIDTH(WORD_WIDTH - 1)) reverse_in (
 	.data_i			(data_i),
 	.data_o			(data_reversed)
 );

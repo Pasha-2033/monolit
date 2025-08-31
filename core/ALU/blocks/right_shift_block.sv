@@ -6,7 +6,7 @@ module right_shift_block #(
 	//operands
 	input	wire	[WORD_WIDTH - 1:0]	a_i,
 	input	wire	[WORD_WIDTH - 1:0]	b_i,
-	input	wire	[WORD_WIDTH - 1:0]	c_i,
+	input	wire	[WORD_WIDTH - 2:0]	c_i,
 	//result
 	output	wire	[WORD_WIDTH - 1:0]	r_o,
 	//flags

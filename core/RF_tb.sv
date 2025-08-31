@@ -14,7 +14,7 @@ logic	[3:0][ADDRESS_WIDTH - 1:0]	select_r;
 logic	[3:0][WORD_WIDTH - 1:0]		data_to;
 wire	[3:0][WORD_WIDTH - 1:0]		data_a_from;
 wire	[3:0][WORD_WIDTH - 1:0]		data_b_from;
-wire	[1:0][WORD_WIDTH - 1:0]		data_c_from;
+wire	[1:0][WORD_WIDTH - 2:0]		data_c_from;
 logic	[3:0]						en_writing = '0;
 always #10 clock = ~clock;
 RF #(.WORD_WIDTH(WORD_WIDTH), .ADDRESS_WIDTH(ADDRESS_WIDTH), .IP_OFFSET(2)) rf (
