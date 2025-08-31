@@ -1,9 +1,10 @@
 `ifndef STD_UTILS
 	`include "utils.sv"
 `endif
+//Written simple, but will cause some warnings
 module RF #(
 	parameter WORD_WIDTH,
-	parameter ADDRESS_WIDTH,
+	parameter ADDRESS_WIDTH,	//MUST BE 3+, OTHERWISE tdec WILL BE INCORRECT!
 	parameter IP_OFFSET
 ) (
 	input	wire								clk_i,
@@ -19,6 +20,7 @@ module RF #(
 
 	input	wire	[WORD_WIDTH - 1:0]			main_input_i,	//Core read
 	input	wire	[WORD_WIDTH - 1:0]			inst_input_i,	//Instruction immutable
+	input	wire	[WORD_WIDTH - 1:0]			flags_i,
 
 	input	wire	[3:0][WORD_WIDTH - 1:0]		data_i,
 	input	wire	[3:0]						enable_writing_i,
@@ -28,29 +30,42 @@ module RF #(
 	output	wire	[1:0][WORD_WIDTH - 1:0]		c_o,
 
 	output	wire	[WORD_WIDTH - 1:0]			ROD_o,	//Read Only Data
-	output	wire	[WORD_WIDTH - 1:0]			ROA_o	//Read Only Address
+	output	wire	[WORD_WIDTH - 1:0]			ROA_o,	//Read Only Address
+
+	output	wire	[WORD_WIDTH - 1:0]			instr_ptr_o,
+	output	reg		[WORD_WIDTH - 1:0]			flags_o
 );
 localparam UNITS = 2 ** ADDRESS_WIDTH;	//how many units can be selected
 
-wire [3:0][UNITS - 3:0] decoded_select;
-tree_decoder #(.OUTPUT_WIDTH(UNITS - 2)) tdec [3:0] (
+wire [3:0][UNITS - 1:0] decoded_select;
+tree_decoder #(.OUTPUT_WIDTH(UNITS)) tdec [3:0] (
 	.enable_i(enable_writing_i),
 	.select_i(select_r_i),
 	.data_o(decoded_select)
 );
 
-reg [UNITS - 3:0][WORD_WIDTH - 1:0] GPR;
+reg [UNITS - 1:4][WORD_WIDTH - 1:0] GPR;
+counter_forward #(.WORD_WIDTH(WORD_WIDTH)) IP (
+	.clk_i(clk_i),
+	.action_i(enable_unit[3]),
+	.arst_i(arst_i),
+	.data_i(data_to_unit[3]),
+	.data_o(instr_ptr_o)
+	//will_overflow_o (ignore, may be used later)
+);
 
-wire [UNITS - 3:0] senior_priority = decoded_select[2] | decoded_select[3];
-wire [UNITS - 3:0] enable_unit = decoded_select[0] | decoded_select[1] | senior_priority;
+wire [UNITS - 1:3] senior_priority = decoded_select[2] | decoded_select[3];					//will truncate, it`s ok
+wire [UNITS - 1:3] enable_unit = decoded_select[0] | decoded_select[1] | senior_priority;	//will truncate, it`s ok
 
-wire [1:0][UNITS - 3:0][WORD_WIDTH - 1:0] data_to_unit_mux_layer;
-wire [UNITS - 3:0][WORD_WIDTH - 1:0] data_to_unit;
+wire [1:0][UNITS - 1:3][WORD_WIDTH - 1:0] data_to_unit_mux_layer;
+wire [UNITS - 1:3][WORD_WIDTH - 1:0] data_to_unit;
 
 wire [UNITS - 1:0][WORD_WIDTH - 1:0] data_out = {
+	GPR,
+	instr_ptr_o,
+	flags_o,
 	inst_input_i,
-	main_input_i,
-	GPR
+	main_input_i
 };
 
 genvar i;
@@ -59,7 +74,7 @@ generate
 		assign a_o[i] = data_out[select_a_i[i]];
 		assign b_o[i] = data_out[select_b_i[i]];
 	end
-	for(i = 0; i < UNITS - 2; ++i) begin : data_to_unit_selection
+	for(i = 3; i < UNITS; ++i) begin : data_to_unit_selection
 		assign data_to_unit_mux_layer[0][i] = decoded_select[1][i] ? data_i[1] : data_i[0];
 		assign data_to_unit_mux_layer[1][i] = decoded_select[3][i] ? data_i[3] : data_i[2];
 		//Quartus allows line below, but Icarus can`t read this rvalue:
@@ -77,7 +92,9 @@ integer j;
 always_ff @(posedge clk_i or posedge arst_i) begin
 	if (arst_i) begin
 		GPR <= '0;
+		flags_o <= '0;
 	end else begin
+		flags_o <= flags_i;
 		for (j = $low(GPR); j < $high(GPR) + 1; ++j) begin : GPR_set
 			if (enable_unit[j]) begin
 				GPR[j] <= data_to_unit[j];
