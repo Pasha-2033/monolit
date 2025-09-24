@@ -2,10 +2,8 @@
 	`include "utils.sv"
 `endif
 //Written simple, but will cause some warnings
-module RF #(
-	parameter WORD_WIDTH,
-	parameter ADDRESS_WIDTH,	//MUST BE 3+, OTHERWISE tdec WILL BE INCORRECT!
-	parameter IP_OFFSET
+module RF_32x #(
+	parameter ADDRESS_WIDTH	//MUST BE 3+, OTHERWISE tdec WILL BE INCORRECT!
 ) (
 	input	wire								clk_i,
 	input	wire								arst_i,
@@ -15,25 +13,19 @@ module RF #(
 	input	wire	[1:0][ADDRESS_WIDTH - 1:0]	select_c_i,	//2x shift
 	input	wire	[3:0][ADDRESS_WIDTH - 1:0]	select_r_i,	//arithmetic, logic, 2x shift
 
-	input	wire	[ADDRESS_WIDTH - 1:0]		select_ROD_i,	//Read Only Data
-	input	wire	[ADDRESS_WIDTH - 1:0]		select_ROA_i,	//Read Only Address
+	input	wire	[31:0]						main_input_i,	//Core read
+	input	wire	[31:0]						inst_input_i,	//Instruction immutable
+	input	wire	[31:0]						flags_i,
 
-	input	wire	[WORD_WIDTH - 1:0]			main_input_i,	//Core read
-	input	wire	[WORD_WIDTH - 1:0]			inst_input_i,	//Instruction immutable
-	input	wire	[WORD_WIDTH - 1:0]			flags_i,
-
-	input	wire	[3:0][WORD_WIDTH - 1:0]		data_i,
+	input	wire	[3:0][31:0]					data_i,
 	input	wire	[3:0]						enable_writing_i,
 
-	output	wire	[3:0][WORD_WIDTH - 1:0]		a_o,
-	output	wire	[3:0][WORD_WIDTH - 1:0]		b_o,
-	output	wire	[1:0][WORD_WIDTH - 1:0]		c_o,
+	output	wire	[3:0][31:0]					a_o,
+	output	wire	[3:0][31:0]					b_o,
+	output	wire	[1:0][31:0]					c_o,
 
-	output	wire	[WORD_WIDTH - 1:0]			ROD_o,	//Read Only Data
-	output	wire	[WORD_WIDTH - 1:0]			ROA_o,	//Read Only Address
-
-	output	wire	[WORD_WIDTH - 1:0]			instr_ptr_o,
-	output	reg		[WORD_WIDTH - 1:0]			flags_o
+	output	wire	[31:0]						instr_ptr_o,
+	output	wire	[31:0]						flags_o
 );
 localparam UNITS = 2 ** ADDRESS_WIDTH;	//how many units can be selected
 
@@ -44,8 +36,8 @@ tree_decoder #(.OUTPUT_WIDTH(UNITS)) tdec [3:0] (
 	.data_o(decoded_select)
 );
 
-reg [UNITS - 1:4][WORD_WIDTH - 1:0] GPR;
-counter_forward #(.WORD_WIDTH(WORD_WIDTH)) IP (
+reg [UNITS - 1:4][31:0] GPR;
+counter_forward #(.WORD_WIDTH(32)) IP (
 	.clk_i(clk_i),
 	.action_i(enable_unit[3]),
 	.arst_i(arst_i),
@@ -53,17 +45,24 @@ counter_forward #(.WORD_WIDTH(WORD_WIDTH)) IP (
 	.data_o(instr_ptr_o)
 	//will_overflow_o (ignore, may be used later)
 );
+FLAGS flags (
+	.clk_i(clk_i),
+	.arst_i(arst_i),
+	.to_kernel(GPR[4][0]),
+	.flags_i(flags_i),
+	.flags_o(flags_o)
+);
 
 wire [UNITS - 1:3] senior_priority = decoded_select[2] | decoded_select[3];					//will truncate, it`s ok
 wire [UNITS - 1:3] enable_unit = decoded_select[0] | decoded_select[1] | senior_priority;	//will truncate, it`s ok
 
-wire [1:0][UNITS - 1:3][WORD_WIDTH - 1:0] data_to_unit_mux_layer;
-wire [UNITS - 1:3][WORD_WIDTH - 1:0] data_to_unit;
+wire [1:0][UNITS - 1:3][31:0] data_to_unit_mux_layer;
+wire [UNITS - 1:3][31:0] data_to_unit;
 
-wire [UNITS - 1:0][WORD_WIDTH - 1:0] data_out = {
+wire [UNITS - 1:0][31:0] data_out = {
 	GPR,
 	instr_ptr_o,
-	flags_o,
+	flags_o,	//здесь проблема, на Wх ожидается Wх флаг, а выдается стабильно 32
 	inst_input_i,
 	main_input_i
 };
@@ -86,15 +85,11 @@ assign c_o = {
 	data_out[select_c_i[1]],
 	data_out[select_c_i[0]]
 };
-assign ROD_o = data_out[select_ROD_i];
-assign ROA_o = data_out[select_ROA_i];
 integer j;
 always_ff @(posedge clk_i or posedge arst_i) begin
 	if (arst_i) begin
 		GPR <= '0;
-		flags_o <= '0;
 	end else begin
-		flags_o <= flags_i;
 		for (j = $low(GPR); j < $high(GPR) + 1; ++j) begin : GPR_set
 			if (enable_unit[j]) begin
 				GPR[j] <= data_to_unit[j];

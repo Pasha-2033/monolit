@@ -1,4 +1,5 @@
-`include "RF.SV"
+`include "RF/RF_32x.SV"
+`include "RF/FLAGS.SV"
 `include "ALU/ALU.sv"
 `include "ALU/blocks/arithmetic_block.sv"
 `include "ALU/blocks/logic_block.sv"
@@ -49,24 +50,20 @@ wire [3:0][31:0] RF_A;
 wire [3:0][31:0] RF_B;
 wire [1:0][31:0] RF_C;
 //RF
-RF #(.WORD_WIDTH(32), .ADDRESS_WIDTH(5), .IP_OFFSET(2)) rf (
+RF_32x #(.ADDRESS_WIDTH(5)) rf (
 	.clk_i(clk),
 	.arst_i(arst),
 	.select_a_i(select_a),
 	.select_b_i(select_b),
 	.select_c_i(select_c),
 	.select_r_i(select_r),
-	.select_ROD_i(select_ROD_i),
-	.select_ROA_i(select_ROA_i),
 	.main_input_i(main_input_i),
 	.inst_input_i(inst_input_i),
 	.data_i(RF_D_IN),
 	.enable_writing_i(enable_writing),
 	.a_o(RF_A),
 	.b_o(RF_B),
-	.c_o(RF_C),
-	.ROD_o(ROD_o),
-	.ROA_o(ROA_o)
+	.c_o(RF_C)
 );
 //ALU
 ALU #(.WORD_WIDTH(32)) alu (

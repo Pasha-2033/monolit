@@ -1,5 +1,6 @@
 `include "utils.sv"
-`include "RF.sv"
+`include "RF/RF_32x.sv"
+`include "RF/FLAGS.sv"
 `timescale 1ps/1ps
 module RF_tb;
 localparam ADDRESS_WIDTH = 5;
@@ -20,7 +21,7 @@ logic	[3:0]						en_writing = '0;
 wire	[WORD_WIDTH - 1:0]			instr_ptr_o;
 wire	[WORD_WIDTH - 1:0]			flags_o;
 always #10 clock = ~clock;
-RF #(.WORD_WIDTH(WORD_WIDTH), .ADDRESS_WIDTH(ADDRESS_WIDTH), .IP_OFFSET(2)) rf (
+RF_32x #(.ADDRESS_WIDTH(ADDRESS_WIDTH)) rf (
 	.clk_i(clock),
 	.arst_i(arst),
 
