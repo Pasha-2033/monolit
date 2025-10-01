@@ -85,4 +85,5 @@ set_global_assignment -name SYSTEMVERILOG_FILE std/ui.sv -library std
 set_global_assignment -name SYSTEMVERILOG_FILE std/utils.sv -library std
 set_global_assignment -name SYSTEMVERILOG_FILE std/io.sv -library std
 set_global_assignment -name SYSTEMVERILOG_FILE main.sv
+set_global_assignment -name ALLOW_REGISTER_RETIMING ON
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

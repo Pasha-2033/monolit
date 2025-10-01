@@ -28,6 +28,13 @@ module main (
 	output	wire	[7:0]		instr_ptr_o,
 	output	reg		[31:0]		flags_o
 );
+
+fast_comparator #(.WORD_WIDTH(4)) bpu_comparator (
+	.a_i(main_input_i),
+	.b_i(main_input_i)
+	//.below_o(jump_o)
+);
+
 wire [3:0][31:0] RF_D_IN;
 wire [3:0][31:0] RF_A;
 wire [3:0][31:0] RF_B;
