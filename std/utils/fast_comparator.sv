@@ -29,38 +29,26 @@ module fast_comparator #(
 // precompare lvl (prepares for tree and valid only if WORD_WIDTH = 1)
 wire [WORD_WIDTH - 1:0] pre_above = a_i & ~b_i;
 wire [WORD_WIDTH - 1:0] pre_below = ~a_i & b_i;
-
 genvar i;
 generate
 	if (WORD_WIDTH > 1) begin
-		// calc tree SIZE
-		localparam I_LIMIT	= $clog2(WORD_WIDTH) - 1;
-		localparam CV		= 2 ** (I_LIMIT + 1) - WORD_WIDTH;
-
-		// provide tree wires (2 ** n - 1)
-		wire [2 ** (I_LIMIT + 1) - 2:0] above_tree;
-		wire [2 ** (I_LIMIT + 1) - 2:0] below_tree;
-
-		// assign tree to output
+		localparam TREE_LVL_NUM = $clog2(WORD_WIDTH);
+		localparam TREE_LVL_LAST = TREE_LVL_NUM + 1;
+		localparam OVER_WIDTH = 2 ** TREE_LVL_NUM - WORD_WIDTH;
+		wire [2 ** TREE_LVL_LAST - 2:0] above_tree;
+		wire [2 ** TREE_LVL_LAST - 2:0] below_tree;
 		assign above_o = above_tree[0];
 		assign below_o = below_tree[0];
-		
-		// create tree
-		for (i = 0; i < I_LIMIT; ++i) begin : compare_lvl
-			localparam SIZE = 2 ** i;			//size of block
-			localparam SENIOR = SIZE * 2 - 1;	//senior start address
-			localparam JUNIOR = SENIOR * 2;		//junior end address
-			assign above_tree[SIZE - 1+:SIZE] = above_tree[JUNIOR-:SIZE] | (above_tree[SENIOR+:SIZE] & ~below_tree[JUNIOR-:SIZE]);
-			assign below_tree[SIZE - 1+:SIZE] = below_tree[JUNIOR-:SIZE] | (~above_tree[JUNIOR-:SIZE] & below_tree[SENIOR+:SIZE]);
+		for (i = 0; i < TREE_LVL_NUM; ++i) begin : compare_lvl
+			localparam SIZE = 2 ** i;
+			assign above_tree[SIZE * 2 - 2-:SIZE] = above_tree[SIZE * 4 - 2-:SIZE] | (above_tree[SIZE * 2 - 1+:SIZE] & ~below_tree[SIZE * 4 - 2-:SIZE]);
+			assign below_tree[SIZE * 2 - 2-:SIZE] = below_tree[SIZE * 4 - 2-:SIZE] | (~above_tree[SIZE * 4 - 2-:SIZE] & below_tree[SIZE * 2 - 1+:SIZE]);
 		end
-
-		// assign pre_above and pre_below to tree
-		localparam SIZE = 2 ** I_LIMIT;
-		assign above_tree[SIZE - 1+:SIZE - CV] = pre_above[WORD_WIDTH - CV - 1-:SIZE - CV] | (pre_above[SIZE - 1:0] & ~pre_below[WORD_WIDTH - CV - 1-:SIZE - CV]);
-		assign below_tree[SIZE - 1+:SIZE - CV] = pre_below[WORD_WIDTH - CV - 1-:SIZE - CV] | (~pre_above[WORD_WIDTH - CV - 1-:SIZE - CV] & pre_below[SIZE - 1:0]);
-		if (CV) begin
-			assign above_tree[2 ** (I_LIMIT + 1) - 2-:CV] = pre_above[WORD_WIDTH - 1-:CV];
-			assign below_tree[2 ** (I_LIMIT + 1) - 2-:CV] = pre_below[WORD_WIDTH - 1-:CV];
+		assign above_tree[2 ** TREE_LVL_LAST - 2-:WORD_WIDTH - OVER_WIDTH * 2] = pre_above[WORD_WIDTH - 1-:WORD_WIDTH - OVER_WIDTH * 2];
+		assign below_tree[2 ** TREE_LVL_LAST - 2-:WORD_WIDTH - OVER_WIDTH * 2] = pre_below[WORD_WIDTH - 1-:WORD_WIDTH - OVER_WIDTH * 2];
+		if (OVER_WIDTH) begin
+			assign above_tree[2 ** TREE_LVL_LAST - WORD_WIDTH - 2+:OVER_WIDTH] = pre_above[OVER_WIDTH+:OVER_WIDTH] | (pre_above[0+:OVER_WIDTH] & ~pre_below[OVER_WIDTH+:OVER_WIDTH]);
+			assign below_tree[2 ** TREE_LVL_LAST - WORD_WIDTH - 2+:OVER_WIDTH] = pre_below[OVER_WIDTH+:OVER_WIDTH] | (~pre_above[OVER_WIDTH+:OVER_WIDTH] & pre_below[0+:OVER_WIDTH]);
 		end
 	end
 	else begin
