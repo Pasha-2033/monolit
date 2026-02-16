@@ -21,8 +21,18 @@ module bit_reverse #(
 );
 genvar i;
 generate
+	//{<<{data_i}} is more readable, but not supported by everyone
 	for(i = 0; i < WORD_WIDTH; ++i) begin: reverse
 		assign data_o[i] = data_i[WORD_WIDTH - i - 1];
 	end
 endgenerate
 endmodule
+//virtual class with static function is more convenient to use, but not supported by everyone
+`define BIT_REVERSE_FUNCTION(NAME, WORD_WIDTH)			\
+function logic [(WORD_WIDTH) - 1:0] NAME;				\
+	input logic [(WORD_WIDTH) - 1:0] in;				\
+	integer i;											\
+	for (i = 0; i < (WORD_WIDTH); ++i) begin : reverse	\
+		NAME[i] = in[(WORD_WIDTH) - i - 1];				\
+	end													\
+endfunction

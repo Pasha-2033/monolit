@@ -28,7 +28,18 @@ module main (
 	output	wire	[7:0]		instr_ptr_o,
 	output	reg		[31:0]		flags_o
 );
-fast_comparator #(.WORD_WIDTH(6)) bpu_comparator (
+EAU eau (
+	.a_i(main_input_i),
+	.b_i(main_input_i)
+);
+EAB eab (
+	.a_i(main_input_i)
+);
+ELU elu (
+	.a_i(main_input_i)
+);
+
+fast_comparator #(.WORD_WIDTH(8)) bpu_comparator (
 	.a_i(main_input_i),
 	.b_i(main_input_i)
 	//.below_o(jump_o)
@@ -109,7 +120,7 @@ signed_extension #(.IN_WIDTH(8), .OUT_WIDTH(16)) se (
 	.in(in),
 	.out(out)
 );
-//
+/*
 BPU_LVL_1 #(.STEP_NUM(4), .JUMP_AREA(12)) bpu (
 	.clk_i(clk),
 	.arst_i(arst)
@@ -120,4 +131,5 @@ BPU_LVL_1 #(.STEP_NUM(4), .JUMP_AREA(12)) bpu (
 
 	//output wire jump_o
 );
+*/
 endmodule

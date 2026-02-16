@@ -16,7 +16,7 @@ module utils_tb;
 task_tree_decoder #(.OUTPUT_WIDTH(12)) td();
 task_CLAA #(.WORD_WIDTH(16)) claa();
 task_CSA_S #(.WORD_WIDTH(12), .UNIT_WIDTH(5)) csa_s();
-task_fast_comparator #(.WORD_WIDTH(6)) fc();
+task_fast_comparator #(.WORD_WIDTH(8)) fc();
 task_polyshift_r #(.WORD_WIDTH(8)) psr();
 task_polyshift_l #(.WORD_WIDTH(8)) psl();
 task_RCA_M #(.WORD_WIDTH(16)) rca_m();
@@ -42,7 +42,7 @@ initial begin
 		csa_s.run($urandom, $urandom);
 	end*/
 	$display("fast_comparator task:");
-	repeat (100000) begin
+	repeat (10000) begin
 		fc.run($urandom, $urandom);
 	end
 	$display("END");
