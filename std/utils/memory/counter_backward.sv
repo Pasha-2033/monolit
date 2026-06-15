@@ -21,7 +21,8 @@ Action table:
 	action_i = 1	- load
 */
 module counter_backward #(
-	parameter WORD_WIDTH
+	parameter WORD_WIDTH,
+	parameter WORD_RESET = 0
 ) (
 	input	wire					clk_i,
 	input	wire					action_i,
@@ -32,16 +33,25 @@ module counter_backward #(
 
 	output	wire					will_underflow_o
 );
-wire [WORD_WIDTH - 2:0] load_flow = {load_flow[WORD_WIDTH - 3:0] | data_o[WORD_WIDTH - 2:1], data_o[0]};
-
-assign will_underflow_o = ~|data_o;
-
+wire [WORD_WIDTH - 1:0] load_flow;
+generate
+	if (WORD_WIDTH > 1) begin
+		assign load_flow = {load_flow[WORD_WIDTH - 2:0] | data_o[WORD_WIDTH - 2:0], data_o[0]};
+		assign will_underflow_o = ~|data_o;
+	end else begin
+		assign load_flow = ~data_o;
+		assign will_underflow_o = load_flow;
+	end
+endgenerate
 always_ff @(posedge clk_i or posedge arst_i) begin
 	if (arst_i) begin
-		data_o <= '0;
-	end 
-	else begin
-		data_o <= action_i ? data_i : {data_o[WORD_WIDTH - 1:1] ^ ~load_flow, ~data_o[0]};
+		data_o <= WORD_RESET;
+	end else begin
+		if (WORD_WIDTH > 1) begin
+			data_o <= action_i ? data_i : {data_o[WORD_WIDTH - 1:1] ^ ~load_flow[WORD_WIDTH - 1:1], ~data_o[0]};
+		end else begin
+			data_o <= action_i ? data_i : load_flow;
+		end
 	end
 end
 endmodule

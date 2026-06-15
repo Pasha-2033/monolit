@@ -1,7 +1,8 @@
-`define STD_UTILS
+`define STD_UTILS 1
 `define min(a, b) ((a) > (b) ? (b) : (a))
 `define max(a, b) ((a) > (b) ? (a) : (b))
 
+`define IS_2POW(N) (|N & ~|(N & N - 1))
 
 //CARRY is a special case of DOUBLE_PRECISION
 typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
@@ -15,6 +16,7 @@ typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
 
 //wire management
 `include "utils/wires/bit_reverse.sv"
+`include "utils/wires/signed_extension.sv"
 `include "utils/wires/screening_by_junior.sv"
 `include "utils/wires/screening_by_senior.sv"
 `include "utils/wires/encoder.sv"

@@ -71,7 +71,43 @@ generate
 	end
 endgenerate
 endmodule
-
+/*
+Provides:
+	Сomparament with constant
+Dependencies:
+	NONE
+Parameters:
+	WORD_WIDTH - width of input word and constant
+Ports:
+	value	- value to compare
+	equal	- is value == CONST_VALUE
+Generation:
+	TODO
+Additional comments:
+	Fully combinational
+	Won`t overgenerate
+	equal = ~(above | below)
+*/
+module const_comparator #(
+	parameter WORD_WIDTH,
+	parameter[WORD_WIDTH - 1:0] CONST_VALUE
+) (
+	input wire [WORD_WIDTH - 1:0] value,
+	output wire equal
+);
+genvar i;
+generate
+	if (!CONST_VALUE) begin
+		assign equal = ~|value;
+	end else begin
+		wire [WORD_WIDTH - 1:0] result;
+		for (i = 0; i < WORD_WIDTH; ++i) begin : N_compare
+			assign result[i] = CONST_VALUE[i] ? value[i] : ~value[i];
+		end
+		assign equal = &result;
+	end
+endgenerate
+endmodule
 
 
 

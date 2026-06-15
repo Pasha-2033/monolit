@@ -24,7 +24,8 @@ Count and load table:
 	count_i = 1 & load_i = 1 - count down
 */
 module counter #(
-	parameter WORD_WIDTH
+	parameter WORD_WIDTH,
+	parameter WORD_RESET = 0
 ) (
 	input	wire					clk_i,
 	input	wire					count_i,
@@ -36,17 +37,30 @@ module counter #(
 
 	output	wire					will_overflow_o
 );
-wire [WORD_WIDTH - 1:0] load_flow	= {load_flow[WORD_WIDTH - 2:0] & ~data_o[WORD_WIDTH - 2:0], count_i & load_i};
-wire [WORD_WIDTH - 1:0] count_flow	= {count_flow[WORD_WIDTH - 2:0] & data_o[WORD_WIDTH - 2:0], ~load_flow[0]};
-
-assign will_overflow_o = &(load_flow[0] ? ~data_o : data_o);
-
+wire [WORD_WIDTH - 1:0] load_flow;
+wire [WORD_WIDTH - 1:0] count_flow;
+generate
+	if (WORD_WIDTH > 1) begin
+		assign load_flow	= {load_flow[WORD_WIDTH - 2:0] & ~data_o[WORD_WIDTH - 2:0], count_i & load_i};
+		assign count_flow	= {count_flow[WORD_WIDTH - 2:0] & data_o[WORD_WIDTH - 2:0], ~load_flow[0]};
+		assign will_overflow_o = &(load_flow[0] ? ~data_o : data_o);
+	end else begin
+		assign load_flow	= count_i & load_i;
+		assign count_flow	= ~data_o;
+		assign will_overflow_o = load_flow ? count_flow : data_o;
+	end
+endgenerate
 always @(posedge clk_i or posedge arst_i) begin
 	if (arst_i) begin
-		data_o <= '0;
-	end
-	else if (count_i | load_i) begin
-		data_o <= ~count_i & load_i ? data_i : {data_o[WORD_WIDTH - 1:1] ^ (count_flow[WORD_WIDTH - 1:1] | load_flow[WORD_WIDTH - 1:1]), ~data_o[0]};
+		data_o <= WORD_RESET;
+	end else begin
+		if (WORD_WIDTH > 1) begin
+			if (count_i | load_i) begin
+				data_o <= ~count_i & load_i ? data_i : {data_o[WORD_WIDTH - 1:1] ^ (count_flow[WORD_WIDTH - 1:1] | load_flow[WORD_WIDTH - 1:1]), ~data_o[0]};
+			end
+		end else begin
+			data_o <= ~count_i & load_i ? data_i : count_flow;
+		end
 	end
 end
 endmodule

@@ -40,7 +40,22 @@ task run;
 		#20
 		$display("%s\tEXPECTED: %d\tGOT: %d\t OVERFLOW %b", data_o == data_i ? "OK  " : "FAIL", data_i, data_o, will_overflow);
 		load = '1;
+		data_i = 9;
+		#20
+		$display("%s\tEXPECTED: %d\tGOT: %d\t OVERFLOW %b", data_o == data_i ? "OK  " : "FAIL", data_i, data_o, will_overflow);
+		data_i = 8;
+		#20
+		$display("%s\tEXPECTED: %d\tGOT: %d\t OVERFLOW %b", data_o == data_i ? "OK  " : "FAIL", data_i, data_o, will_overflow);
 		data_i = 7;
+		#20
+		$display("%s\tEXPECTED: %d\tGOT: %d\t OVERFLOW %b", data_o == data_i ? "OK  " : "FAIL", data_i, data_o, will_overflow);
+		data_i = 6;
+		#20
+		$display("%s\tEXPECTED: %d\tGOT: %d\t OVERFLOW %b", data_o == data_i ? "OK  " : "FAIL", data_i, data_o, will_overflow);
+		data_i = 5;
+		#20
+		$display("%s\tEXPECTED: %d\tGOT: %d\t OVERFLOW %b", data_o == data_i ? "OK  " : "FAIL", data_i, data_o, will_overflow);
+		data_i = 4;
 		#20
 		$display("%s\tEXPECTED: %d\tGOT: %d\t OVERFLOW %b", data_o == data_i ? "OK  " : "FAIL", data_i, data_o, will_overflow);
 	end

@@ -81,7 +81,7 @@ EAU unit (
 
 	.a_i(a_i),
 	.b_i(b_i),
-	.not_b_i(~b_i),
+	.not_a_i(~a_i),
 	.r_o(r_o),
 
 	.CF_o(CF_from_unit)

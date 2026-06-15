@@ -74,7 +74,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/units/eau.sv
 set_global_assignment -name SYSTEMVERILOG_FILE core/RF/RF_32x.sv
 set_global_assignment -name SYSTEMVERILOG_FILE core/RF/BPU.sv
 set_global_assignment -name SYSTEMVERILOG_FILE core/RF/FLAGS.sv
-set_global_assignment -name SYSTEMVERILOG_FILE std/utils/wires/signed_extension.sv -library std
 set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/ALU.sv
 set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/blocks/right_shift_block.sv
 set_global_assignment -name SYSTEMVERILOG_FILE core/ALU/blocks/logic_block.sv

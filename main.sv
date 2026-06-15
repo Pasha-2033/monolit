@@ -44,6 +44,21 @@ fast_comparator #(.WORD_WIDTH(8)) bpu_comparator (
 	.b_i(main_input_i)
 	//.below_o(jump_o)
 );
+const_comparator #(.WORD_WIDTH(4), .CONST_VALUE(4'b0101)) cc (
+	.value(in[3:0])
+);
+UART_RX #(.WORD_WIDTH(8)) rp (
+	.clk_i(clk)
+);
+UART_TX #(.WORD_WIDTH(8)) tp (
+	.clk_i(clk)
+);
+counter #(.WORD_WIDTH(3)) c (
+	.clk_i(clk)
+);
+counter_backward #(.WORD_WIDTH(1)) cb1 (
+	.clk_i(clk)
+);
 
 wire [3:0][31:0] RF_D_IN;
 wire [3:0][31:0] RF_A;

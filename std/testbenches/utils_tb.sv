@@ -40,14 +40,14 @@ initial begin
 	$display("CSA_S task:");
 	repeat (10) begin
 		csa_s.run($urandom, $urandom);
-	end*/
+	end
+	
 	$display("fast_comparator task:");
 	repeat (10000) begin
 		fc.run($urandom, $urandom);
 	end
 	$display("END");
 
-	/*
 	$display("polyshift_r task:");
 	psr.run(8'b11001100, 7'b0101010);
 	$display("polyshift_l task:");
@@ -64,12 +64,12 @@ initial begin
 	repeat (10) begin
 		sbs.run($urandom);
 	end
+	*/
 	$display("counter task:");
 	tcc.run();
 	$display("counter forward task:");
 	tcf.run();
 	$display("counter backward task:");
 	tcb.run();
-	*/
 end
 endmodule
