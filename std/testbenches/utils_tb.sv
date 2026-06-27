@@ -11,6 +11,8 @@
 `include "counter.sv"
 `include "counter_forward.sv"
 `include "counter_backward.sv"
+`include "stack.sv"
+`include "queue.sv"
 `timescale 1ps/1ps
 module utils_tb;
 task_tree_decoder #(.OUTPUT_WIDTH(12)) td();
@@ -25,6 +27,10 @@ task_screening_by_senior #(.WORD_WIDTH(8)) sbs();
 task_counter #(.WORD_WIDTH(8)) tcc();
 task_counter_forward #(.WORD_WIDTH(8)) tcf();
 task_counter_backward #(.WORD_WIDTH(8)) tcb();
+task_sync_stack_tri syst_tri();
+task_sync_stack_bin syst_bin();
+task_sync_queue_tri syqu_tri();
+task_sync_queue_bin syqu_bin();
 initial begin
 	/*
 	$display("_tree_decoder task:");
@@ -65,11 +71,19 @@ initial begin
 		sbs.run($urandom);
 	end
 	*/
-	$display("counter task:");
-	tcc.run();
-	$display("counter forward task:");
-	tcf.run();
-	$display("counter backward task:");
-	tcb.run();
+	//$display("counter task:");
+	//tcc.run();
+	//$display("counter forward task:");
+	//tcf.run();
+	//$display("counter backward task:");
+	//tcb.run();
+	//$display("sync stack tri task:");
+	//syst_tri.run();
+	//$display("sync stack bin task:");
+	//syst_bin.run();
+	//$display("sync queue tri task:");
+	//syqu_tri.run();
+	//$display("sync queue bin task:");
+	//syqu_bin.run();
 end
 endmodule

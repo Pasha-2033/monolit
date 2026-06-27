@@ -3,6 +3,7 @@
 `define max(a, b) ((a) > (b) ? (a) : (b))
 
 `define IS_2POW(N) (|N & ~|(N & N - 1))
+`define POW2_DIFF(N) (2 ** $clog2(N) - N)
 
 //CARRY is a special case of DOUBLE_PRECISION
 typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
@@ -25,6 +26,8 @@ typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
 `include "utils/memory/counter.sv"
 `include "utils/memory/counter_forward.sv"
 `include "utils/memory/counter_backward.sv"
+`include "utils/memory/stack.sv"
+`include "utils/memory/queue.sv"
 //shifts
 `include "utils/shifts/polyshift_l_cf.sv"
 `include "utils/shifts/polyshift_l.sv"

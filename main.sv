@@ -59,6 +59,18 @@ counter #(.WORD_WIDTH(3)) c (
 counter_backward #(.WORD_WIDTH(1)) cb1 (
 	.clk_i(clk)
 );
+sync_stack_tri #(.WORD_WIDTH(8), .LENGTH(8)) syst_tri (
+	.clk_i(clk)
+);
+sync_stack_bin #(.WORD_WIDTH(8), .ADDRESS_WIDTH(3)) syst_bin (
+	.clk_i(clk)
+);
+sync_queue_tri #(.WORD_WIDTH(8), .LENGTH(4)) syqu_tri (
+	.clk_i(clk)
+);
+sync_queue_bin #(.WORD_WIDTH(8), .ADDRESS_WIDTH(3)) syqu_bin (
+	.clk_i(clk)
+);
 
 wire [3:0][31:0] RF_D_IN;
 wire [3:0][31:0] RF_A;

@@ -35,7 +35,8 @@ module counter #(
 	input	wire [WORD_WIDTH - 1:0]	data_i,
 	output	reg  [WORD_WIDTH - 1:0]	data_o,
 
-	output	wire					will_overflow_o
+	output	wire					will_overflow_o,
+	output	wire					will_underflow_o
 );
 wire [WORD_WIDTH - 1:0] load_flow;
 wire [WORD_WIDTH - 1:0] count_flow;
@@ -43,16 +44,18 @@ generate
 	if (WORD_WIDTH > 1) begin
 		assign load_flow	= {load_flow[WORD_WIDTH - 2:0] & ~data_o[WORD_WIDTH - 2:0], count_i & load_i};
 		assign count_flow	= {count_flow[WORD_WIDTH - 2:0] & data_o[WORD_WIDTH - 2:0], ~load_flow[0]};
-		assign will_overflow_o = &(load_flow[0] ? ~data_o : data_o);
+		assign will_overflow_o = &data_o;
+		assign will_underflow_o = ~|data_o;
 	end else begin
 		assign load_flow	= count_i & load_i;
 		assign count_flow	= ~data_o;
-		assign will_overflow_o = load_flow ? count_flow : data_o;
+		assign will_overflow_o = data_o;
+		assign will_underflow_o = count_flow;
 	end
 endgenerate
 always @(posedge clk_i or posedge arst_i) begin
 	if (arst_i) begin
-		data_o <= WORD_RESET;
+		data_o <= WORD_RESET[WORD_WIDTH - 1:0];
 	end else begin
 		if (WORD_WIDTH > 1) begin
 			if (count_i | load_i) begin

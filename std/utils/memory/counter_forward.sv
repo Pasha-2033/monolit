@@ -40,12 +40,12 @@ generate
 		assign will_overflow_o = &data_o;
 	end else begin
 		assign count_flow = ~data_o;
-		assign will_underflow_o = data_o;
+		assign will_overflow_o = data_o;
 	end
 endgenerate
 always_ff @(posedge clk_i or posedge arst_i) begin
 	if (arst_i) begin
-		data_o <= WORD_RESET;
+		data_o <= WORD_RESET[WORD_WIDTH - 1:0];
 	end else begin
 		if (WORD_WIDTH > 1) begin
 			data_o <= action_i ? data_i : {data_o[WORD_WIDTH - 1:1] ^ count_flow[WORD_WIDTH - 1:1], ~data_o[0]};
