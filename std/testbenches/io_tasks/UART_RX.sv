@@ -6,7 +6,7 @@ logic [19:0] LINE;
 wire [7:0] data;
 wire ready;
 
-always #95 clk = ~clk; //100, 5% latency
+always #96 clk = ~clk; //100, 4% latency
 always #10 RX_clk = ~RX_clk;
 always_ff @(posedge clk) begin
 	LINE <= {1'b1, LINE[19:1]};
@@ -25,14 +25,14 @@ UART_RX #(
 
 task run;
 	begin
-		LINE = {5'b11111, 10'b1011001100, 5'b11111 };
+		LINE = {5'b11111, 1'b1, 8'b01100110, 1'b0, 5'b11111 };
 		arst = '1;
 		#5
 		$display("STATE: %b, WORD %b, LINE %b", ready, data, LINE);
 		arst = '0;
 		#1000000
 		$display("STATE: %b, WORD %b, LINE %b", ready, data, LINE);
-		LINE = {5'b11111, 10'b1000110000, 5'b11111 };
+		LINE = {5'b11111, 1'b1, 8'b00011000, 1'b0, 5'b11111 };
 		#1000000
 		$display("STATE: %b, WORD %b, LINE %b", ready, data, LINE);
 	end

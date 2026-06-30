@@ -1,6 +1,3 @@
-`ifndef STD_UTILS
-	`include "utils.sv"
-`endif
 /*
 Provides: 
 	UART recieving line
@@ -10,11 +7,11 @@ Parameters:
 	WORD_WIDTH		- width of data value
 	FREQ_PRECISION	- = clk_i/RX clock
 Ports:
-	clk_i				- clock
-	arst_i				- asynchronous reset
-	RX_i				- recieving line
-	data_from_RX_o		- data value
-	data_ready_o		- is data recieved and actual
+	clk_i			- clock
+	arst_i			- asynchronous reset
+	RX_i			- recieving line
+	data_from_RX_o	- data value
+	data_ready_o	- is data recieved and actual
 Generation:
 	NONE
 Additional comments:

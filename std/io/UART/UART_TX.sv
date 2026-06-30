@@ -1,7 +1,25 @@
-`ifndef STD_UTILS
-	`include "utils.sv"
-`endif
-
+/*
+Provides: 
+	UART transmiting line
+Dependencies:
+	counter_backward
+Parameters:
+	WORD_WIDTH		- width of data value
+Ports:
+	clk_i			- clock
+	arst_i			- asynchronous reset
+	set_word_i		- set word for transmition
+	data_to_TX_i	- value to transmit
+	TX_o			- transmiting line
+	TX_ready_o		- ready for transmition
+Generation:
+	NONE
+Additional comments:
+	won`t accept any words during the transmition
+	doesn`t support 1,5x & 2x stop signals (but can be wrapped)
+	doesn`t support parity bit (but can be wrapped)
+	TX: WORD_WIDTH-N-1
+*/
 module UART_TX #(
 	WORD_WIDTH
 ) (

@@ -42,6 +42,7 @@ typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
 
 
 `include "utils/fast_comparator.sv"
+`include "utils/clk_reductor.sv"
 
 
 //TODO сумматор с условным переносом это 3 сумматора (младшие, 2 старших (Cin = 0 и 1))

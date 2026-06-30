@@ -6,7 +6,7 @@ logic pop;
 logic [7:0] data_to;
 wire [7:0] data_from;
 always #10 clk = ~clk;
-sync_queue_tri #(.WORD_WIDTH(8), .LENGTH(4)) s_queue (
+sync_queue_tri #(.WORD_WIDTH(8), .LENGTH(8)) s_queue (
 	.clk_i(clk),
 	.arst_i(reset),
 	.push_i(push),
@@ -73,9 +73,9 @@ logic push;
 logic pop;
 logic [7:0] data_to;
 wire [7:0] data_from;
-wire [1:0] point;
+wire [2:0] point;
 always #10 clk = ~clk;
-sync_queue_bin #(.WORD_WIDTH(8), .ADDRESS_WIDTH(2)) s_queue (
+sync_queue_bin #(.WORD_WIDTH(8), .ADDRESS_WIDTH(3)) s_queue (
 	.clk_i(clk),
 	.arst_i(reset),
 	.push_i(push),
@@ -94,6 +94,7 @@ task run();
 		reset = '1;
 		push = '0;
 		pop = '0;
+		data_to = 0;
 		#5
 		$display("data_from(%d), point(%d)", data_from, point); //0 (-, -, -, -)
 		reset = '0;
@@ -119,7 +120,42 @@ task run();
 		#20
 		$display("data_from(%d), point(%d)", data_from, point); //4 (-, -, -, 4)
 		#20
-		$display("data_from(%d), point(%d)", data_from, point); //must be overflow :)
+		$display("data_from(%d), point(%d)!", data_from, point); //must be overflow :)
+		reset = '1;
+		#20
+		$display("data_from(%d), point(%d)", data_from, point);
+		reset = '0;
+		push = '1;
+		pop = '0;
+		data_to = 10;
+		#20
+		$display("data_from(%d), point(%d)", data_from, point);
+		pop = '1;
+		data_to = 1;
+		#20
+		$display("data_from(%d), point(%d)", data_from, point);
+		data_to = 2;
+		#20
+		$display("data_from(%d), point(%d)", data_from, point);
+		data_to = 3;
+		#20
+		$display("data_from(%d), point(%d)!", data_from, point);
+		data_to = 0;
+		reset = '1;
+		#20
+		$display("data_from(%d), point(%d)", data_from, point);
+		reset = '0;
+		push = '1;
+		pop = '1;
+		data_to = 1;
+		#20
+		$display("data_from(%d), point(%d)", data_from, point);
+		data_to = 2;
+		#20
+		$display("data_from(%d), point(%d)", data_from, point);
+		data_to = 3;
+		#20
+		$display("data_from(%d), point(%d)", data_from, point);
 	end
 endtask
 endmodule

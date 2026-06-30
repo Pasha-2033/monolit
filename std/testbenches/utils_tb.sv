@@ -13,6 +13,7 @@
 `include "counter_backward.sv"
 `include "stack.sv"
 `include "queue.sv"
+`include "clk_reductor.sv"
 `timescale 1ps/1ps
 module utils_tb;
 task_tree_decoder #(.OUTPUT_WIDTH(12)) td();
@@ -31,6 +32,7 @@ task_sync_stack_tri syst_tri();
 task_sync_stack_bin syst_bin();
 task_sync_queue_tri syqu_tri();
 task_sync_queue_bin syqu_bin();
+task_const_clk_reductor cclkr();
 initial begin
 	/*
 	$display("_tree_decoder task:");
@@ -85,5 +87,6 @@ initial begin
 	//syqu_tri.run();
 	//$display("sync queue bin task:");
 	//syqu_bin.run();
+	cclkr.run();
 end
 endmodule

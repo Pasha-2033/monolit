@@ -26,7 +26,9 @@ counter #(.WORD_WIDTH(ADDRESS_WIDTH)) pointer (
 	.will_underflow_o(is_empty)
 );
 assign shifted_output = {data[LENGTH - 2:0], data[LENGTH - 1]};
-assign data_o = shifted_output[point];
+//if we will push & pop at the same time with 0 cap - we will get data[LENGTH - 1], which is not initialized
+//if we will push & pop at the sane time with !0 cap - we will shift data register and get correct shifted_output[point] result
+assign data_o = is_empty ? data_i : shifted_output[point];
 integer i;
 always_ff @(posedge clk_i or posedge arst_i) begin
 	if (arst_i) begin

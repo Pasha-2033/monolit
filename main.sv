@@ -71,6 +71,15 @@ sync_queue_tri #(.WORD_WIDTH(8), .LENGTH(4)) syqu_tri (
 sync_queue_bin #(.WORD_WIDTH(8), .ADDRESS_WIDTH(3)) syqu_bin (
 	.clk_i(clk)
 );
+UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3)) uart (
+	.clk_i(clk)
+);
+const_clk_reductor #(.REDUCTION(3)) sclkr (
+	.clk_i(clk)
+);
+dyn_clk_reductor #(.WORD_WIDTH(8)) dclkr (
+	.clk_i(clk)
+);
 
 wire [3:0][31:0] RF_D_IN;
 wire [3:0][31:0] RF_A;
