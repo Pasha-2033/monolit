@@ -14,8 +14,12 @@
 `include "stack.sv"
 `include "queue.sv"
 `include "clk_reductor.sv"
-`timescale 1ps/1ps
+`include "one_bit_sync.sv"
+`include "cdc_handshake.sv"
+//`timescale 1ps/1ps
 module utils_tb;
+timeunit 1ns;          // единица времени – наносекунды
+timeprecision 100ps;   // точность 0.1 нс – разрешает дробные задержки
 task_tree_decoder #(.OUTPUT_WIDTH(12)) td();
 task_CLAA #(.WORD_WIDTH(16)) claa();
 task_CSA_S #(.WORD_WIDTH(12), .UNIT_WIDTH(5)) csa_s();
@@ -33,6 +37,8 @@ task_sync_stack_bin syst_bin();
 task_sync_queue_tri syqu_tri();
 task_sync_queue_bin syqu_bin();
 task_const_clk_reductor cclkr();
+task_one_bit_2s_sync obs();
+task_cdc_handshake cdc_hsh();
 initial begin
 	/*
 	$display("_tree_decoder task:");
@@ -87,6 +93,10 @@ initial begin
 	//syqu_tri.run();
 	//$display("sync queue bin task:");
 	//syqu_bin.run();
-	cclkr.run();
+	//cclkr.run();
+	//$display("one bit sync task:");
+	//obs.run();
+	$display("cdc handshake task:");
+	cdc_hsh.run();
 end
 endmodule

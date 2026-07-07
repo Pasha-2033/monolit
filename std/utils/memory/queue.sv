@@ -1,3 +1,4 @@
+//DO NOT CAUSE OVERFLOW/UNDERFLOW!!!
 module sync_queue_bin #(
 	parameter WORD_WIDTH,
 	parameter ADDRESS_WIDTH
@@ -38,7 +39,8 @@ always_ff @(posedge clk_i or posedge arst_i) begin
 	end
 end
 endmodule
-//if empty - will send 'z, can be avoided by is_empty ? '0 : 'z
+//DO NOT CAUSE OVERFLOW/UNDERFLOW!!!
+//if empty - will send 'z, can be avoided by (is_empty & ~(push_i & pop_i)) ? '0 : 'z
 module sync_queue_tri #(
 	parameter WORD_WIDTH,
 	parameter LENGTH
@@ -52,6 +54,38 @@ module sync_queue_tri #(
 	output	wire						is_empty,
 	output	wire						is_full
 );
+reg [LENGTH - 1:0][WORD_WIDTH - 1:0] data;
+reg [LENGTH:0] filled;
+
+genvar i;
+generate
+	for (i = 0; i < LENGTH; ++i) begin : output_collector
+		assign data_o = filled[i + 1] ? data[i] : 'z;
+	end
+endgenerate
+
+always_ff @(posedge clk_i or posedge arst_i) begin
+	if (arst_i) begin
+		data <= '0;
+		filled[LENGTH:1] <= '0;
+		filled[0] <= '1;
+	end else begin
+		if (pop_i) begin
+			if (push_i) begin
+				data <= {data[LENGTH - 2:0], data_i};
+			end else begin
+				filled[LENGTH:1] <= {1'b0, filled[LENGTH:2]};
+				filled[0] <= filled[1] ? '1 : filled[0];
+			end
+		end else if (push_i) begin
+			data <= {data[LENGTH - 2:0], data_i};
+			filled[LENGTH - 1:0] <= {filled[LENGTH - 2:0], 1'b0};
+			filled[LENGTH] <= filled[LENGTH] ? '1 : filled[LENGTH - 1];
+		end
+	end
+end
+//OUTDATED (CODE ABOVE IS BETTER IF LENGTH IS BIGGER)
+/*
 reg [LENGTH - 1:0][WORD_WIDTH - 1:0] data;
 reg [LENGTH - 1:0] filled;
 wire [LENGTH - 1:0] output_allowed;
@@ -81,4 +115,5 @@ always_ff @(posedge clk_i or posedge arst_i) begin
 		end
 	end
 end
+*/
 endmodule

@@ -80,6 +80,12 @@ const_clk_reductor #(.REDUCTION(3)) sclkr (
 dyn_clk_reductor #(.WORD_WIDTH(8)) dclkr (
 	.clk_i(clk)
 );
+//SPI_X_slave #(.WORD_WIDTH(7)) spi_x_s (
+//	.clk_i(clk)
+//);
+cdc_handshake #(.WORD_WIDTH(8)) cdc_h (
+	.arst_i(clk)
+);
 
 wire [3:0][31:0] RF_D_IN;
 wire [3:0][31:0] RF_A;

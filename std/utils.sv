@@ -39,8 +39,11 @@ typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
 `include "utils/adders/_CSA_U.sv"
 `include "utils/adders/CLAA.sv"
 `include "utils/adders/CSA_S.sv"
+//atomic
+`include "utils/atomic/one_bit_sync.sv"
+`include "utils/atomic/cdc_handshake.sv"
 
-
+//unsorted
 `include "utils/fast_comparator.sv"
 `include "utils/clk_reductor.sv"
 
@@ -49,46 +52,3 @@ typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
 //младший сумматор выбирает какой из старших подет в ответ
 //то есть старшие это почти что CSA
 
-
-
-
-
-
-
-
-/*
-Provides decoder.
-Parameters:
-	output_width - number of out bits (also defines width of select)
-Ports:
-	select	- value to decode
-	out		- decoded value
-Notes:
-	TODO: i
-	it supports non 2^n outputs, so it won`t overgenerate
-	it`s not reccomended to decode with large output_width (it will generate multiple large AND), use predecoding instead
-*/
-module _array_decoder #(
-	parameter output_width
-) (
-	input	wire [$clog2(`max(output_width, 2)) - 1:0] select,
-	output	wire [output_width - 1:0] out
-);
-genvar i;
-genvar j;
-generate
-	if (output_width > 1) begin
-		localparam input_width = $clog2(output_width);
-		wire [input_width - 1:0] inversed_select = ~select;
-		for (i = 0; i < output_width; ++i) begin: decoded_output
-			wire [input_width - 1:0] selection;
-			for (j = 0; j < input_width; ++j) begin: selection_union
-				assign selection[j] = i % (2 ** (j + 1)) >= 2 ** j ? select[j] : inversed_select[j];
-			end
-			assign out[i] = &selection;
-		end
-	end else begin
-		assign out = select;
-	end
-endgenerate
-endmodule
