@@ -23,7 +23,7 @@ cdc_handshake #(.WORD_WIDTH(8)) dut (
 );
 
 // Входные данные для передачи (массив)
-logic [3:0][7:0] tx_data  = { 8'hA5, 8'h5A, 8'hFF, 8'h00 };
+logic [7:0][7:0] tx_data  = { 8'hA5, 8'h5A, 8'hFF, 8'h00, 8'hA5, 8'h5A, 8'hFF, 8'h00 };
 logic [7:0] expected;
 int i;
 int errors = 0;

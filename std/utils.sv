@@ -1,9 +1,11 @@
-`define STD_UTILS 1
+`define STD_UTILS 2
 `define min(a, b) ((a) > (b) ? (b) : (a))
 `define max(a, b) ((a) > (b) ? (a) : (b))
 
 `define IS_2POW(N) (|N & ~|(N & N - 1))
 `define POW2_DIFF(N) (2 ** $clog2(N) - N)
+
+`define BIN_TO_GRAY(B) (B ^ (B >> 1))
 
 //CARRY is a special case of DOUBLE_PRECISION
 typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
@@ -22,12 +24,16 @@ typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
 `include "utils/wires/screening_by_senior.sv"
 `include "utils/wires/encoder.sv"
 `include "utils/wires/tree_decoder.sv"
+`include "utils/wires/gray_to_bin.sv"
 //memory
 `include "utils/memory/counter.sv"
 `include "utils/memory/counter_forward.sv"
 `include "utils/memory/counter_backward.sv"
-`include "utils/memory/stack.sv"
-`include "utils/memory/queue.sv"
+`include "utils/memory/dual_port_memory.sv"
+`include "utils/memory/sync_stack_tri.sv"
+`include "utils/memory/sync_stack_bin.sv"
+`include "utils/memory/sync_queue_tri.sv"
+`include "utils/memory/sync_queue_bin.sv"
 //shifts
 `include "utils/shifts/polyshift_l_cf.sv"
 `include "utils/shifts/polyshift_l.sv"
@@ -40,8 +46,12 @@ typedef enum bit[1:0] {LOGIC, ARITHMETIC, DOUBLE_PRECISION, CYCLIC} SHIFT_TYPE;
 `include "utils/adders/CLAA.sv"
 `include "utils/adders/CSA_S.sv"
 //atomic
-`include "utils/atomic/one_bit_sync.sv"
+`include "utils/atomic/r2s_sync.sv"
 `include "utils/atomic/cdc_handshake.sv"
+`include "utils/atomic/_write_ctrl.sv"
+`include "utils/atomic/_read_ctrl.sv"
+`include "utils/atomic/async_queue.sv"
+`include "utils/atomic/clock_mux.sv"
 
 //unsorted
 `include "utils/fast_comparator.sv"

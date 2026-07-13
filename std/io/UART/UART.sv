@@ -36,8 +36,8 @@ sync_queue_bin #(.WORD_WIDTH(WORD_WIDTH), .ADDRESS_WIDTH(BUFFER_ADDRESS_WIDTH)) 
 	.pop_i(pop_word_i),
 	.data_i(RX_from_port_to_queue),
 	.data_o(data_o),
-	.is_full(RX_buffer_overflow),
-	.is_empty(RX_buffer_underflow)
+	.is_full_o(RX_buffer_overflow),
+	.is_empty_o(RX_buffer_underflow)
 );
 UART_RX #(.WORD_WIDTH(WORD_WIDTH), .FREQ_PRECISION(CLK_REDUCTION)) RX_LINE (
 	.clk_i(clk_i),
@@ -71,8 +71,8 @@ sync_queue_bin #(.WORD_WIDTH(WORD_WIDTH), .ADDRESS_WIDTH(BUFFER_ADDRESS_WIDTH)) 
 	.pop_i(~TX_buffer_empty & TX_line_ready & ~prev_TX_state),
 	.data_i(data_i),
 	.data_o(TX_from_queue_to_port),
-	.is_full(TX_buffer_overflow),
-	.is_empty(TX_buffer_empty)
+	.is_full_o(TX_buffer_overflow),
+	.is_empty_o(TX_buffer_empty)
 );
 UART_TX #(.WORD_WIDTH(WORD_WIDTH)) TX_LINE (
 	.clk_i(reduced_TX_clk),

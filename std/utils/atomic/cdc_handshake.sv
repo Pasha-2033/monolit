@@ -1,16 +1,37 @@
+/*
+Provides:
+	Clock Domain Crossing Handshake
+Dependencies:
+	r2s_sync
+Parameters:
+	WORD_WIDTH	- width of word to transmit
+Ports:
+	arst_i		- asynchronous reset
+	clk_src_i	- source clock
+	data_src_i	- data from source
+	valid_src_i	- data_src_i is ready for reading
+	ready_src_o	- module is ready for new handshake
+	clk_dst_i	- destination clock
+	data_dst_o	- data to destination
+	valid_dst_o	- data_dst_o is ready for writing
+Generation:
+	None
+Additional comments:
+	valid signals should be strobe, not level
+*/
 module cdc_handshake #(
-    parameter WORD_WIDTH
+	parameter WORD_WIDTH
 ) (
 	input	wire						arst_i,
 
-    input	wire						clk_src_i,		//source clock
-    input	wire	[WORD_WIDTH - 1:0]	data_src_i,
-    input	wire						valid_src_i,	//data_src_i is ready for reading
-    output	wire						ready_src_o,	//module is ready for new handshake
+	input	wire						clk_src_i,
+	input	wire	[WORD_WIDTH - 1:0]	data_src_i,
+	input	wire						valid_src_i,
+	output	wire						ready_src_o,
 
-    input	wire						clk_dst_i,		//destination clock
-    output	reg		[WORD_WIDTH - 1:0]	data_dst_o,
-    output	wire						valid_dst_o		//data_dst_o is ready for writing
+	input	wire						clk_dst_i,
+	output	reg		[WORD_WIDTH - 1:0]	data_dst_o,
+	output	wire						valid_dst_o
 );
 reg req;
 reg ack;
@@ -20,17 +41,17 @@ wire ack_synced;
 assign ready_src_o = ~(req | ack_synced);
 assign valid_dst_o = ack;
 //assign valid_dst_o = req_synced & ~ack;
-one_bit_2s_sync sync_req (
-	.clk_dst_i (clk_dst_i),
-	.arst_i    (arst_i),
-	.sig_i     (req),
-	.sig_o     (req_synced)
+r2s_sync sync_req (
+	.clk_dst_i(clk_dst_i),
+	.arst_i(arst_i),
+	.sig_i(req),
+	.sig_o(req_synced)
 );
-one_bit_2s_sync sync_ack (
-	.clk_dst_i (clk_src_i),
-	.arst_i    (arst_i),
-	.sig_i     (ack),
-	.sig_o     (ack_synced)
+r2s_sync sync_ack (
+	.clk_dst_i(clk_src_i),
+	.arst_i(arst_i),
+	.sig_i(ack),
+	.sig_o(ack_synced)
 );
 always @(posedge clk_src_i or posedge arst_i) begin
 	if (arst_i) begin

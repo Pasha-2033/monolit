@@ -85,9 +85,9 @@ sync_queue_bin #(.WORD_WIDTH(8), .ADDRESS_WIDTH(3)) s_queue (
 
 	.data_o(data_from),
 
-	.point(point)
-	//.is_empty,
-	//.is_full
+	.point_o(point)
+	//.is_empty_o,
+	//.is_full_o
 );
 task run();
 	begin

@@ -11,11 +11,12 @@
 `include "counter.sv"
 `include "counter_forward.sv"
 `include "counter_backward.sv"
-`include "stack.sv"
-`include "queue.sv"
+`include "sync_stack.sv"
+`include "sync_queue.sv"
 `include "clk_reductor.sv"
-`include "one_bit_sync.sv"
+`include "r2s_sync.sv"
 `include "cdc_handshake.sv"
+`include "async_queue.sv"
 //`timescale 1ps/1ps
 module utils_tb;
 timeunit 1ns;          // единица времени – наносекунды
@@ -37,8 +38,9 @@ task_sync_stack_bin syst_bin();
 task_sync_queue_tri syqu_tri();
 task_sync_queue_bin syqu_bin();
 task_const_clk_reductor cclkr();
-task_one_bit_2s_sync obs();
+task_r2s_sync obs();
 task_cdc_handshake cdc_hsh();
+task_async_queue as_queue();
 initial begin
 	/*
 	$display("_tree_decoder task:");
@@ -96,7 +98,10 @@ initial begin
 	//cclkr.run();
 	//$display("one bit sync task:");
 	//obs.run();
-	$display("cdc handshake task:");
-	cdc_hsh.run();
+	//$display("cdc handshake task:");
+	//cdc_hsh.run();
+	$display("async queue task:");
+	//as_queue.run();
+	as_queue.arun();
 end
 endmodule

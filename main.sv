@@ -86,6 +86,12 @@ dyn_clk_reductor #(.WORD_WIDTH(8)) dclkr (
 cdc_handshake #(.WORD_WIDTH(8)) cdc_h (
 	.arst_i(clk)
 );
+async_queue #(.WORD_WIDTH(8), .ADDRESS_WIDTH(3), .ALMOST_FULL_THRESHOLD(2), .ALMOST_EMPTY_THRESHOLD(2)) rctrl (
+	.r_clk_i(clk)
+);
+clock_mux #(.ADDRESS_WIDTH(2)) clk_mux (
+	.arst_i(clk)
+);
 
 wire [3:0][31:0] RF_D_IN;
 wire [3:0][31:0] RF_A;

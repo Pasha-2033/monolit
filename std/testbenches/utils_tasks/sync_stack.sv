@@ -14,7 +14,7 @@ sync_stack_bin #(.WORD_WIDTH(8), .ADDRESS_WIDTH(2)) s_stack (
 	.pop_i(pop),
 	.data_i(data_to),
 	.data_o(data_from),
-	.point(point)
+	.point_o(point)
 );
 task run();
 	begin
@@ -67,8 +67,8 @@ sync_stack_tri #(.WORD_WIDTH(8), .LENGTH(8)) s_stack (
 	.pop_i(pop),
 	.data_i(data_to),
 	.data_o(data_from),
-	.is_empty(empty),
-	.is_full(full)
+	.is_empty_o(empty),
+	.is_full_o(full)
 );
 task run();
 	begin

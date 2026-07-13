@@ -1,4 +1,4 @@
-module task_one_bit_2s_sync;
+module task_r2s_sync;
 logic[7:0] data_slow = 8'b10100101;
 logic clk_fast = '1;
 logic clk_slow = '0;
@@ -6,11 +6,11 @@ logic reset;
 wire sig_out;
 always #1 clk_fast = ~clk_fast;
 always #5 clk_slow = ~clk_slow;
-one_bit_2s_sync fc (
-	.clk_dst_i(clk_fast),
-    .arst_i(reset),
-    .sig_i(data_slow[0]), 
-    .sig_o(sig_out)  
+r2s_sync fc (
+  .clk_dst_i(clk_fast),
+  .arst_i(reset),
+  .sig_i(data_slow[0]), 
+  .sig_o(sig_out)  
 );
 always_ff @(posedge clk_slow) begin
 	data_slow <= {1'b0, data_slow[7:1]};
