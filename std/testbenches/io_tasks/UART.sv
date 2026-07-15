@@ -1,21 +1,22 @@
 module task_UART_as_RX;
-logic clk = '0;
-logic uart_clk = '0;
+logic RX_clk = '0;
+logic L_clk = '1;
+logic mc_clk = '1;
 logic arst;
-logic [19:0] LINE;
+logic [8:0] LINE;
 wire [7:0] data_from;
 logic [7:0] data_to;
 logic push_word;
 logic pop_word;
 
-always #100 clk = ~clk;
-always #10 uart_clk = ~uart_clk;
-always_ff @(posedge clk) begin
-	LINE = {1'b1, LINE[19:1]};
-end
+always #5 mc_clk = ~mc_clk;
+always #10 RX_clk = ~RX_clk;
+always #40 L_clk = ~L_clk;
 
 UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3)) uart (
-	.clk_i(uart_clk),
+	.clk_i(mc_clk),
+	.clk_to_RX_i(RX_clk),
+	.clk_to_TX_i(L_clk),
 	.arst_i(arst),
 
 	.push_word_i(push_word),
@@ -32,36 +33,54 @@ task run_RX;
 		arst = '1;
 		pop_word = '0;
 		push_word = '0;
+		LINE = '1;
 		#1
 		$display("FROM: %b", data_from);
 		arst = '0;
-		LINE = {5'b11111, 1'b1, 8'b01100110, 1'b0, 5'b11111 };
-		#10000
+		repeat (3) begin
+			@(posedge L_clk);
+		end
+		LINE = {8'b01100110, 1'b0};
+		repeat ($size(LINE) + 1) begin
+			@(posedge L_clk);
+			LINE = {1'b1, LINE[8:1]};
+		end
 		$display("FROM: %b", data_from);
-		LINE = {5'b11111, 1'b1, 8'b10011001, 1'b0, 5'b11111 };
-		#10000
+		LINE = {8'b10011001, 1'b0 };
+		repeat ($size(LINE) + 1) begin
+			@(posedge L_clk);
+			LINE = {1'b1, LINE[8:1]};
+		end
 		$display("FROM: %b", data_from);
-		LINE = {5'b11111, 1'b1, 8'b01010101, 1'b0, 5'b11111 };
-		#10000
+		LINE = {8'b01010101, 1'b0 };
+		repeat ($size(LINE) + 1) begin
+			@(posedge L_clk);
+			LINE = {1'b1, LINE[8:1]};
+		end
 		$display("FROM: %b", data_from);
-		LINE = {5'b11111, 1'b1, 8'b10101010, 1'b0, 5'b11111 };
-		#10000
+		LINE = {8'b10101010, 1'b0};
+		repeat ($size(LINE) + 1) begin
+			@(posedge L_clk);
+			LINE = {1'b1, LINE[8:1]};
+		end
 		$display("FROM: %b", data_from);
-		push_word = '0;
+		#1000
+		@(negedge mc_clk)
 		pop_word = '1;
-		#20
+		@(posedge mc_clk);
 		$display("FROM: %b!!!", data_from);
-		#20
+		@(posedge mc_clk);
 		$display("FROM: %b", data_from);
-		#20
+		@(posedge mc_clk);
 		$display("FROM: %b", data_from);
-		#20
+		@(posedge mc_clk);
 		$display("FROM: %b", data_from);
-		#20 //overflow
+		@(posedge mc_clk); //overflow
 		$display("FROM: %b", data_from);
 	end
 endtask
 endmodule
+/*
 module task_UART_as_TX;
 logic uart_clk = '0;
 logic arst;
@@ -124,3 +143,4 @@ task run_TX;
 	end
 endtask
 endmodule
+*/
