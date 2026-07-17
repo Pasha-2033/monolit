@@ -41,7 +41,7 @@ generate
 	for (i = 0; i < LENGTH; ++i) begin : clock_domain
 		wire [LENGTH - 2:0] set_enable;
 		for (j = 0; j < i; ++j) begin : junior
-			assign set_enable[j] = set_enable[j];
+			assign set_enable[j] = en_reg[j];
 		end
 		for (j = i; j < LENGTH - 1; ++j) begin : senior
 			assign set_enable[j] = en_reg[j + 1];

@@ -13,7 +13,7 @@ always #5 mc_clk = ~mc_clk;
 always #10 RX_clk = ~RX_clk;
 always #40 L_clk = ~L_clk;
 
-UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3)) uart (
+UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3), .RX_ALMOST_FULL_THRESHOLD(2), .TX_ALMOST_FULL_THRESHOLD(2)) uart (
 	.clk_i(mc_clk),
 	.clk_to_RX_i(RX_clk),
 	.clk_to_TX_i(L_clk),
@@ -80,9 +80,10 @@ task run_RX;
 	end
 endtask
 endmodule
-/*
 module task_UART_as_TX;
-logic uart_clk = '0;
+logic RX_clk = '0;
+logic L_clk = '0;
+logic mc_clk = '0;
 logic arst;
 wire LINE;
 wire [7:0] data_from;
@@ -90,11 +91,15 @@ logic [7:0] data_to;
 logic push_word;
 logic pop_word;
 
-always #10 uart_clk = ~uart_clk;
+always #5 mc_clk = ~mc_clk;
+always #10 RX_clk = ~RX_clk;
+always #40 L_clk = ~L_clk;
 
 
-UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3)) uart (
-	.clk_i(uart_clk),
+UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3), .RX_ALMOST_FULL_THRESHOLD(2), .TX_ALMOST_FULL_THRESHOLD(2)) uart (
+	.clk_i(mc_clk),
+	.clk_to_RX_i(RX_clk),
+	.clk_to_TX_i(L_clk),
 	.arst_i(arst),
 
 	.push_word_i(push_word),
@@ -109,38 +114,43 @@ UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3)) uart (
 task run_TX;
 	begin
 		arst = '1;
-		#5
-		$display("FROM: %b, LINE: %b", data_from, LINE);
-		arst = '0;
-		push_word = '1;
 		pop_word = '0;
-		data_to = 1;
-		#20
-		$display("FROM: %b, LINE: %b", data_from, LINE);
 		push_word = '0;
-		#20000
-		$display("FROM: %b, LINE: %b!", data_from, LINE);
-		push_word = '1;
-		data_to = 2;
-		#20
-		$display("FROM: %b, LINE: %b", data_from, LINE);
-		data_to = 3;
-		#20
-		$display("FROM: %b, LINE: %b", data_from, LINE);
-		data_to = 4;
-		#20
-		$display("FROM: %b, LINE: %b", data_from, LINE);
-		push_word = '0;
-		#20000
-		$display("FROM: %b, LINE: %b&", data_from, LINE);
-		pop_word = '1;
-		#20
-		$display("-FROM: %b, LINE: %b", data_from, LINE);
-		#20
-		$display("-FROM: %b, LINE: %b", data_from, LINE);
-		#20
-		$display("-FROM: %b, LINE: %b", data_from, LINE);
+		repeat (3) begin
+			@(posedge L_clk);
+		end
+		$display("FROM: %b", data_from);
+		arst = '0;
+		repeat (3) begin
+			@(posedge L_clk);
+		end
+		fork
+			begin
+				@(negedge mc_clk);
+				push_word = '1;
+				data_to = 1;
+				@(posedge mc_clk);
+				$display("FROM: %b", data_from);
+				@(negedge mc_clk);
+				data_to = 2;
+				@(posedge mc_clk);
+				$display("FROM: %b", data_from);
+				@(negedge mc_clk);
+				data_to = 3;
+				@(posedge mc_clk);
+				$display("FROM: %b", data_from);
+				@(negedge mc_clk);
+				push_word = '0;
+			end
+			begin
+				#5000
+				pop_word = '1;
+				repeat (5) begin //4 & 5 - overflow, should be 0
+					@(posedge mc_clk);
+					$display("!FROM: %b", data_from);
+				end
+			end
+		join
 	end
 endtask
 endmodule
-*/

@@ -47,33 +47,40 @@ wire [ADDRESS_WIDTH:0] w_addr_gray_sync;
 wire [ADDRESS_WIDTH:0] w_addr_bin_sync;
 wire [ADDRESS_WIDTH:0] occupied;
 wire no_counting;
-wire almost_empty_above;
-wire almost_empty_below;
 wire is_empty_above;
 wire is_empty_below;
 assign no_counting = ~(re_i & ~is_empty_o);
 assign r_addr_bin_o = ptr_bin[ADDRESS_WIDTH - 1:0];
 assign r_addr_gray_o = `BIN_TO_GRAY(ptr_bin);
 assign is_empty_o = ~(is_empty_above | is_empty_below);
-assign almost_empty_o = ~almost_empty_above | almost_empty_below;
 fast_comparator #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) is_empty_cmp (
 	.a_i(w_addr_bin_sync),
 	.b_i(ptr_bin),
 	.above_o(is_empty_above),
 	.below_o(is_empty_below)
 );
-fast_comparator #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) almost_empty_cmp (
-	.a_i(occupied),
-	.b_i(ALMOST_EMPTY_THRESHOLD),
-	.above_o(almost_empty_above),
-	.below_o(almost_empty_below)
-);
-RCA_M #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) occupied_adder (
-	.c_i('1),
-	.a_i(w_addr_bin_sync),
-	.b_i(~ptr_bin),
-	.r_o(occupied)
-);
+generate
+	if (ALMOST_EMPTY_THRESHOLD > 0) begin
+		wire almost_empty_above;
+		wire almost_empty_below;
+		fast_comparator #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) almost_empty_cmp (
+			.a_i(occupied),
+			.b_i(ALMOST_EMPTY_THRESHOLD[ADDRESS_WIDTH:0]),
+			.above_o(almost_empty_above),
+			.below_o(almost_empty_below)
+		);
+		RCA_M #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) occupied_adder (
+			.c_i('1),
+			.a_i(w_addr_bin_sync),
+			.b_i(~ptr_bin),
+			.r_o(occupied)
+		);
+		assign almost_empty_o = ~almost_empty_above | almost_empty_below;
+	end else begin
+		localparam [0:0] EMPTINESS = '0;
+		assign almost_empty_o = EMPTINESS;
+	end
+endgenerate
 gray_to_bin #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) r_addr_bin_conv (
 	.data_i(w_addr_gray_sync),
 	.data_o(w_addr_bin_sync)

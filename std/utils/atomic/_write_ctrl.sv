@@ -20,7 +20,10 @@ Ports:
 	w_addr_gray_o	- write address to _read_ctrl
 	r_addr_gray_i	- read address from _read_ctrl
 Generation:
-	None
+	if ALMOST_FULL_THRESHOLD > 0:
+		flag will be generated
+	else:
+		flag will be assigned to '0
 Additional comments:
 	2 ** ADDRESS_WIDTH - ALMOST_FULL_THRESHOLD - 1 must be >= 0
 */
@@ -43,7 +46,6 @@ module _write_ctrl #(
 wire [ADDRESS_WIDTH:0] ptr_bin;
 wire [ADDRESS_WIDTH:0] r_addr_gray_sync;
 wire [ADDRESS_WIDTH:0] r_addr_bin_sync;
-wire [ADDRESS_WIDTH:0] w_used;
 wire ptr_bin_above;
 wire ptr_bin_below;
 wire no_counting;
@@ -57,17 +59,25 @@ fast_comparator #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) is_full_cmp (
 	.above_o(ptr_bin_above),
 	.below_o(ptr_bin_below)
 );
-fast_comparator #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) almost_full_cmp (
-	.a_i((1 << ADDRESS_WIDTH) - ALMOST_FULL_THRESHOLD - 1),
-	.b_i(w_used),
-	.below_o(almost_full_o)
-);
-RCA_M #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) pre_mask_adder (
-	.c_i('1),
-	.a_i(ptr_bin),
-	.b_i(~r_addr_bin_sync),
-	.r_o(w_used)
-);
+generate
+	if (ALMOST_FULL_THRESHOLD > 0) begin
+		wire [ADDRESS_WIDTH:0] w_used;
+		fast_comparator #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) almost_full_cmp (
+			.a_i((ADDRESS_WIDTH+1)'(1 << ADDRESS_WIDTH) - (ADDRESS_WIDTH+1)'(ALMOST_FULL_THRESHOLD) - (ADDRESS_WIDTH+1)'(1)),
+			.b_i(w_used),
+			.below_o(almost_full_o)
+		);
+		RCA_M #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) pre_mask_adder (
+			.c_i('1),
+			.a_i(ptr_bin),
+			.b_i(~r_addr_bin_sync),
+			.r_o(w_used)
+		);
+	end else begin
+		localparam [0:0] FULLNESS = '0;
+		assign almost_full_o = FULLNESS;
+	end
+endgenerate
 gray_to_bin #(.WORD_WIDTH(ADDRESS_WIDTH + 1)) r_addr_bin_conv (
 	.data_i(r_addr_gray_sync),
 	.data_o(r_addr_bin_sync)

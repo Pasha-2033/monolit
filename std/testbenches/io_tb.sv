@@ -9,7 +9,7 @@ module io_tb;
 task_UART_RX rx();
 task_UART_TX tx();
 task_UART_as_RX uart_rx();
-//task_UART_as_TX uart_tx();
+task_UART_as_TX uart_tx();
 initial begin
 	//$display("as master");
 	//spi.run_as_master(8'b00110011, 8'b10101010, 1'b0);
@@ -19,9 +19,9 @@ initial begin
 	//rx.run();
 	//$display("TX");
 	//tx.run();
-	$display("UART RX");
-	uart_rx.run_RX();
-	//$display("UART TX");
-	//uart_tx.run_TX();
+	//$display("UART RX");
+	//uart_rx.run_RX();
+	$display("UART TX");
+	uart_tx.run_TX();
 end
 endmodule
