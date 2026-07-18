@@ -71,7 +71,7 @@ sync_queue_tri #(.WORD_WIDTH(8), .LENGTH(4)) syqu_tri (
 sync_queue_bin #(.WORD_WIDTH(8), .ADDRESS_WIDTH(3)) syqu_bin (
 	.clk_i(clk)
 );
-UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3), .RX_ALMOST_FULL_THRESHOLD(2), .TX_ALMOST_FULL_THRESHOLD(2)) uart (
+UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3), .RX_ALMOST_FULL_THRESHOLD(2), .RX_ALMOST_EMPTY_THRESHOLD(2), .TX_ALMOST_FULL_THRESHOLD(2)) uart (
 	.clk_i(clk)
 );
 const_clk_reductor #(.REDUCTION(3)) sclkr (

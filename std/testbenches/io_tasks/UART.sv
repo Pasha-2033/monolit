@@ -13,7 +13,7 @@ always #5 mc_clk = ~mc_clk;
 always #10 RX_clk = ~RX_clk;
 always #40 L_clk = ~L_clk;
 
-UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3), .RX_ALMOST_FULL_THRESHOLD(2), .TX_ALMOST_FULL_THRESHOLD(2)) uart (
+UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3), .RX_ALMOST_FULL_THRESHOLD(2), .RX_ALMOST_EMPTY_THRESHOLD(2), .TX_ALMOST_FULL_THRESHOLD(2)) uart (
 	.clk_i(mc_clk),
 	.clk_to_RX_i(RX_clk),
 	.clk_to_TX_i(L_clk),
@@ -96,7 +96,7 @@ always #10 RX_clk = ~RX_clk;
 always #40 L_clk = ~L_clk;
 
 
-UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3), .RX_ALMOST_FULL_THRESHOLD(2), .TX_ALMOST_FULL_THRESHOLD(2)) uart (
+UART #(.WORD_WIDTH(8), .BUFFER_ADDRESS_WIDTH(3), .RX_ALMOST_FULL_THRESHOLD(2), .RX_ALMOST_EMPTY_THRESHOLD(2), .TX_ALMOST_FULL_THRESHOLD(2)) uart (
 	.clk_i(mc_clk),
 	.clk_to_RX_i(RX_clk),
 	.clk_to_TX_i(L_clk),
