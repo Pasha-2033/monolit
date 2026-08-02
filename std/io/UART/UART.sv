@@ -3,30 +3,31 @@ module UART #(
 	parameter BUFFER_ADDRESS_WIDTH,
 	parameter RX_ALMOST_FULL_THRESHOLD,
 	parameter RX_ALMOST_EMPTY_THRESHOLD,
-	parameter TX_ALMOST_FULL_THRESHOLD
+	parameter TX_ALMOST_FULL_THRESHOLD,
+	parameter FREQ_PRECISION
 ) (
-	input wire clk_i,
-	input wire clk_to_RX_i,
-	input wire clk_to_TX_i,
-	input wire arst_i,
+	input	wire						clk_i,
+	input	wire						clk_to_RX_i,
+	input	wire						clk_to_TX_i,
+	input	wire						arst_i,
 
-	input wire push_word_i,
-	input wire pop_word_i,
+	input	wire						push_word_i,
+	input	wire						pop_word_i,
 
-	input wire [WORD_WIDTH - 1:0] data_i,
-	output wire [WORD_WIDTH - 1:0] data_o,
+	input	wire	[WORD_WIDTH - 1:0]	data_i,
+	output	wire	[WORD_WIDTH - 1:0]	data_o,
 
-	input wire RX_i,
-	output wire TX_o,
+	input	wire						RX_i,
+	output	wire						TX_o,
 	//we should start reading!
-	output wire RX_buffer_full,
-	output wire RX_buffer_almost_full,
+	output	wire						RX_buffer_full,
+	output	wire						RX_buffer_almost_full,
 	//we should stop reading!
-	output wire RX_buffer_empty,
-	output wire RX_buffer_almost_empty,
+	output	wire						RX_buffer_empty,
+	output	wire						RX_buffer_almost_empty,
 	//we should stop writing!
-	output wire TX_buffer_full,
-	output wire TX_buffer_almost_full
+	output	wire						TX_buffer_full,
+	output	wire						TX_buffer_almost_full
 );
 wire [WORD_WIDTH - 1:0] RX_from_port_to_queue;
 wire RX_word_ready;
@@ -54,7 +55,7 @@ async_queue #(.WORD_WIDTH(WORD_WIDTH), .ADDRESS_WIDTH(BUFFER_ADDRESS_WIDTH), .AL
 	.is_empty_o(RX_buffer_empty),
 	.almost_empty_o(RX_buffer_almost_empty)
 );
-UART_RX #(.WORD_WIDTH(WORD_WIDTH), .FREQ_PRECISION(4)) RX_LINE (
+UART_RX #(.WORD_WIDTH(WORD_WIDTH), .FREQ_PRECISION(FREQ_PRECISION)) RX_LINE (
 	.clk_i(clk_to_RX_i),
 	.arst_i(arst_i),
 	.RX_i(RX_i),

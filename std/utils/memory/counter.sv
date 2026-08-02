@@ -5,6 +5,7 @@ Dependencies:
 	NONE
 Parameters:
 	WORD_WIDTH	- width of counter value and value for loading
+	WORD_RESET	- reset value
 Ports:
 	clk_i			- clock
 	count			- enable counting
