@@ -11,8 +11,7 @@ module main (
 
 	input	wire	[31:0]		main_input_i,
 	input	wire	[31:0]		inst_input_i,
-
-	input	wire	[15:0]		flags_i,
+	
 	//ALU
 	input	wire	[1:0]		select_flags_i,
 	input	wire				cf_i,
@@ -21,9 +20,6 @@ module main (
 	input	wire	[1:0]		LB_op_i,
 	input	wire	[1:0]		LSB_op_i,
 	input	wire	[1:0]		RSB_op_i,
-
-	input	wire	[7:0]		in,
-	output	wire	[15:0]		out,
 
 	output	wire	[7:0]		instr_ptr_o,
 	output	reg		[31:0]		flags_o
@@ -45,7 +41,7 @@ fast_comparator #(.WORD_WIDTH(8)) bpu_comparator (
 	//.below_o(jump_o)
 );
 const_comparator #(.WORD_WIDTH(4), .CONST_VALUE(4'b0101)) cc (
-	.value(in[3:0])
+	.value(main_input_i[3:0])
 );
 UART_RX #(.WORD_WIDTH(8)) rp (
 	.clk_i(clk)
@@ -82,12 +78,26 @@ UART #(
 	.clk_i(clk)
 );
 SPI_X_slave #(
-	.WORD_WIDTH(8),
+	.WORD_WIDTH(9),
     .BUFFER_ADDRESS_WIDTH(3),
 	.RX_ALMOST_FULL_THRESHOLD(2),
 	.RX_ALMOST_EMPTY_THRESHOLD(2),
-	.TX_ALMOST_FULL_THRESHOLD(2)
-) spi (
+	.TX_ALMOST_FULL_THRESHOLD(2),
+	.LINE_WIDTH(3)
+) spi_slave (
+	.clk_i(clk)
+);
+SPI_X_BUF_master #(
+	.WORD_WIDTH(8), 
+	.DATA_BUFFER_ADDRESS_WIDTH(3),
+	.RX_ALMOST_FULL_THRESHOLD(2),
+	.RX_ALMOST_EMPTY_THRESHOLD(2),
+	.TX_ALMOST_FULL_THRESHOLD(2),
+	.SLAVE_ADDRESS_WIDTH(2),
+	.TASK_BUFFER_ADDRESS_WIDTH(3),
+	.TASK_ALMOST_FULL_THRESHOLD(2),
+	.LINE_WIDTH(2)
+) spi_buf_master (
 	.clk_i(clk)
 );
 const_clk_reductor #(.REDUCTION(3)) sclkr (
@@ -120,7 +130,7 @@ wire [31:0] RF_F = {
 	ALU_of_o,
 	ALU_zf_o,
 	ALU_cf_o,
-	flags_i
+	16'b0
 };
 //RF
 RF_32x #(.ADDRESS_WIDTH(3)) rf (
@@ -179,21 +189,4 @@ ALU #(.WORD_WIDTH(32)) alu (
 	.RSB_c_i(RF_C[1][30:0]),
 	.RSB_r_o(RF_D_IN[3])
 );
-//Signed extension
-signed_extension #(.IN_WIDTH(8), .OUT_WIDTH(16)) se (
-	.in(in),
-	.out(out)
-);
-/*
-BPU_LVL_1 #(.STEP_NUM(4), .JUMP_AREA(12)) bpu (
-	.clk_i(clk),
-	.arst_i(arst)
-
-	//input wire conditional_jump_i,	//if jump happend
-	//input wire shouldnt_jump_i,
-
-
-	//output wire jump_o
-);
-*/
 endmodule
