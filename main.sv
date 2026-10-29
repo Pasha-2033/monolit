@@ -83,7 +83,7 @@ SPI_X_slave #(
 	.RX_ALMOST_FULL_THRESHOLD(2),
 	.RX_ALMOST_EMPTY_THRESHOLD(2),
 	.TX_ALMOST_FULL_THRESHOLD(2),
-	.LINE_WIDTH(3)
+	.LINE_WIDTH(9)
 ) spi_slave (
 	.clk_i(clk)
 );
@@ -96,7 +96,7 @@ SPI_X_BUF_master #(
 	.SLAVE_ADDRESS_WIDTH(2),
 	.TASK_BUFFER_ADDRESS_WIDTH(3),
 	.TASK_ALMOST_FULL_THRESHOLD(2),
-	.LINE_WIDTH(2)
+	.LINE_WIDTH(8)
 ) spi_buf_master (
 	.clk_i(clk)
 );
@@ -117,6 +117,15 @@ async_queue #(.WORD_WIDTH(8), .ADDRESS_WIDTH(3), .ALMOST_FULL_THRESHOLD(0), .ALM
 );
 clock_mux #(.ADDRESS_WIDTH(2)) clk_mux (
 	.arst_i(clk)
+);
+PIT #(.PS_WORD_WIDTH(8), .CNTR_WORD_WIDTH(24)) pit (
+	.clk_i(clk)
+);
+MONO_GPT #(.PS_WORD_WIDTH(8), .CNTR_WORD_WIDTH(24)) gpt (
+	.clk_i(clk)
+);
+POLY_GPT #(.PS_WORD_WIDTH(4), .CNTR_WORD_WIDTH(4), .DESC_WORD_WIDTH(4), .CMP_NUM(2)) poly_gpt (
+	.clk_i(clk)
 );
 
 wire [3:0][31:0] RF_D_IN;

@@ -41,22 +41,23 @@ module SPI_X_BUF_master #( //master with data fifo (not with data pointers (for 
 	input	wire										CPHA_i,
 
 	//we should start reading!
-	output	wire										RX_buffer_full,
-	output	wire										RX_buffer_almost_full,
+	output	wire										RX_buffer_full_o,
+	output	wire										RX_buffer_almost_full_o,
 	//we should stop reading!
-	output	wire										RX_buffer_empty,
-	output	wire										RX_buffer_almost_empty,
+	output	wire										RX_buffer_empty_o,
+	output	wire										RX_buffer_almost_empty_o,
 	//we should stop writing!
-	output	wire										TX_buffer_full,
-	output	wire										TX_buffer_almost_full,
+	output	wire										TX_buffer_full_o,
+	output	wire										TX_buffer_almost_full_o,
 	//we should stop giving tasks
-	output	wire										task_buffer_full,
-	output	wire										task_buffer_almost_full
+	output	wire										task_buffer_full_o,
+	output	wire										task_buffer_almost_full_o,
+	//if there is no task - we should be able to switch CPHA & CPOL dynamicly, for other devices
+	output	wire										task_buffer_empty_o
 );
 enum reg [1:0] { IDLE, PREPARE, COMMUNICATE, FINISH } state;
 reg slave_clk;
 reg L_clk_sampled;
-wire task_buffer_empty;
 wire L_clk_sync;
 wire L_CLK_high_front;
 wire L_CLK_low_front;
@@ -87,7 +88,7 @@ always_ff @(posedge arst_i or posedge X_clk_i) begin
 		L_clk_sampled <= L_clk_sync;
 		case (state)
 			IDLE: begin
-				if (~task_buffer_empty & L_CLK_low_front) begin
+				if (~task_buffer_empty_o & L_CLK_low_front) begin
 					state <= PREPARE;
 				end
 			end
@@ -132,9 +133,9 @@ async_queue #(.WORD_WIDTH(SLAVE_ADDRESS_WIDTH + DATA_BUFFER_ADDRESS_WIDTH + 2), 
 	.re_i((state == FINISH) & L_CLK_high_front),
 	.data_i({slave_address_i, word_num_i, we_i, re_i}),
 	.data_o({SS_addr, word_num, write_enabled, read_enabled}),
-	.is_full_o(task_buffer_full),
-	.almost_full_o(task_buffer_almost_full),
-	.is_empty_o(task_buffer_empty)
+	.is_full_o(task_buffer_full_o),
+	.almost_full_o(task_buffer_almost_full_o),
+	.is_empty_o(task_buffer_empty_o)
 );
 generate
 	if (WORD_WIDTH == LINE_WIDTH) begin
@@ -150,14 +151,14 @@ generate
 			.w_clk_i(X_clk_i),
 			.r_clk_i(clk_i),
 			.arst_i(arst_i),
-			.we_i(((state == COMMUNICATE) | (state == PREPARE)) & L_CLK_H_control & read_enabled & ~RX_buffer_full), //we use ~RX_buffer_full for preventing async_queue overflow, if tasks are ahead of data (dear developer, watch your actions!)
+			.we_i(((state == COMMUNICATE) | (state == PREPARE)) & L_CLK_H_control & read_enabled & ~RX_buffer_full_o), //we use ~RX_buffer_full_o for preventing async_queue overflow, if tasks are ahead of data (dear developer, watch your actions!)
 			.re_i(pop_word_i),
 			.data_i(MISO_i), //TODO: should we use r2s_sync for MISO_i?
 			.data_o(data_o),
-			.is_full_o(RX_buffer_full),
-			.almost_full_o(RX_buffer_almost_full),
-			.is_empty_o(RX_buffer_empty),
-			.almost_empty_o(RX_buffer_almost_empty)
+			.is_full_o(RX_buffer_full_o),
+			.almost_full_o(RX_buffer_almost_full_o),
+			.is_empty_o(RX_buffer_empty_o),
+			.almost_empty_o(RX_buffer_almost_empty_o)
 		);
 		async_queue #(.WORD_WIDTH(WORD_WIDTH), .ADDRESS_WIDTH(DATA_BUFFER_ADDRESS_WIDTH), .ALMOST_FULL_THRESHOLD(TX_ALMOST_FULL_THRESHOLD), .ALMOST_EMPTY_THRESHOLD(0)) TX_buffer (
 			.w_clk_i(clk_i),
@@ -167,8 +168,8 @@ generate
 			.re_i(is_active & L_CLK_L_control & write_enabled & ~TX_buffer_empty), //we use ~TX_buffer_empty for preventing async_queue overflow, if tasks are ahead of data (dear developer, watch your actions!)
 			.data_i(data_i),
 			.data_o(data_acceptor),
-			.is_full_o(TX_buffer_full),
-			.almost_full_o(TX_buffer_almost_full),
+			.is_full_o(TX_buffer_full_o),
+			.almost_full_o(TX_buffer_almost_full_o),
 			.is_empty_o(TX_buffer_empty)
 		);
 	end else begin
@@ -222,14 +223,14 @@ generate
 			.w_clk_i(X_clk_i),
 			.r_clk_i(clk_i),
 			.arst_i(arst_i),
-			.we_i(is_active & L_CLK_L_control & tx_addr_underflow & read_enabled & ~RX_buffer_full), //we use ~RX_buffer_full for preventing async_queue overflow, if tasks are ahead of data (dear developer, watch your actions!)
+			.we_i(is_active & L_CLK_L_control & tx_addr_underflow & read_enabled & ~RX_buffer_full_o), //we use ~RX_buffer_full_o for preventing async_queue overflow, if tasks are ahead of data (dear developer, watch your actions!)
 			.re_i(pop_word_i),
 			.data_i(shift_reg),
 			.data_o(data_o),
-			.is_full_o(RX_buffer_full),
-			.almost_full_o(RX_buffer_almost_full),
-			.is_empty_o(RX_buffer_empty),
-			.almost_empty_o(RX_buffer_almost_empty)
+			.is_full_o(RX_buffer_full_o),
+			.almost_full_o(RX_buffer_almost_full_o),
+			.is_empty_o(RX_buffer_empty_o),
+			.almost_empty_o(RX_buffer_almost_empty_o)
 		);
 		async_queue #(.WORD_WIDTH(WORD_WIDTH), .ADDRESS_WIDTH(DATA_BUFFER_ADDRESS_WIDTH), .ALMOST_FULL_THRESHOLD(TX_ALMOST_FULL_THRESHOLD), .ALMOST_EMPTY_THRESHOLD(0)) TX_buffer (
 			.w_clk_i(clk_i),
@@ -239,8 +240,8 @@ generate
 			.re_i(tx_load & write_enabled & ~TX_buffer_empty), //we use ~TX_buffer_empty for preventing async_queue overflow, if tasks are ahead of data (dear developer, watch your actions!)
 			.data_i(data_i),
 			.data_o(TX_value),
-			.is_full_o(TX_buffer_full),
-			.almost_full_o(TX_buffer_almost_full),
+			.is_full_o(TX_buffer_full_o),
+			.almost_full_o(TX_buffer_almost_full_o),
 			.is_empty_o(TX_buffer_empty)
 		);
 	end

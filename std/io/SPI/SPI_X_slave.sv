@@ -27,14 +27,14 @@ module SPI_X_slave #(
 	input	wire						CPHA_i,
 
 	//we should start reading!
-	output	wire						RX_buffer_full,
-	output	wire						RX_buffer_almost_full,
+	output	wire						RX_buffer_full_o,
+	output	wire						RX_buffer_almost_full_o,
 	//we should stop reading!
-	output	wire						RX_buffer_empty,
-	output	wire						RX_buffer_almost_empty,
+	output	wire						RX_buffer_empty_o,
+	output	wire						RX_buffer_almost_empty_o,
 	//we should stop writing!
-	output	wire						TX_buffer_full,
-	output	wire						TX_buffer_almost_full
+	output	wire						TX_buffer_full_o,
+	output	wire						TX_buffer_almost_full_o
 );
 reg SS_sampled;
 reg CPHA_delay;
@@ -84,14 +84,14 @@ generate
 			.w_clk_i(X_clk_i),
 			.r_clk_i(clk_i),
 			.arst_i(arst_i),
-			.we_i(L_CLK_H_control & ~RX_buffer_full),
+			.we_i(L_CLK_H_control & ~RX_buffer_full_o),
 			.re_i(pop_word_i),
 			.data_i(MOSI_i), //TODO: should we use r2s_sync for MOSI_i?
 			.data_o(data_o),
-			.is_full_o(RX_buffer_full),
-			.almost_full_o(RX_buffer_almost_full),
-			.is_empty_o(RX_buffer_empty),
-			.almost_empty_o(RX_buffer_almost_empty)
+			.is_full_o(RX_buffer_full_o),
+			.almost_full_o(RX_buffer_almost_full_o),
+			.is_empty_o(RX_buffer_empty_o),
+			.almost_empty_o(RX_buffer_almost_empty_o)
 		);
 		async_queue #(.WORD_WIDTH(WORD_WIDTH), .ADDRESS_WIDTH(BUFFER_ADDRESS_WIDTH), .ALMOST_FULL_THRESHOLD(TX_ALMOST_FULL_THRESHOLD), .ALMOST_EMPTY_THRESHOLD(0)) TX_buffer (
 			.w_clk_i(clk_i),
@@ -101,8 +101,8 @@ generate
 			.re_i((L_CLK_L_control | (CPHA_i & ~SS_sampled & SS_sync)) & ~TX_buffer_empty),
 			.data_i(data_i),
 			.data_o(data_acceptor),
-			.is_full_o(TX_buffer_full),
-			.almost_full_o(TX_buffer_almost_full),
+			.is_full_o(TX_buffer_full_o),
+			.almost_full_o(TX_buffer_almost_full_o),
 			.is_empty_o(TX_buffer_empty)
 		);
 	end else begin
@@ -140,14 +140,14 @@ generate
 			.w_clk_i(X_clk_i),
 			.r_clk_i(clk_i),
 			.arst_i(arst_i),
-			.we_i(tx_addr_delay & ~tx_addr_underflow & ~RX_buffer_full),
+			.we_i(tx_addr_delay & ~tx_addr_underflow & ~RX_buffer_full_o),
 			.re_i(pop_word_i),
 			.data_i(shift_reg),
 			.data_o(data_o),
-			.is_full_o(RX_buffer_full),
-			.almost_full_o(RX_buffer_almost_full),
-			.is_empty_o(RX_buffer_empty),
-			.almost_empty_o(RX_buffer_almost_empty)
+			.is_full_o(RX_buffer_full_o),
+			.almost_full_o(RX_buffer_almost_full_o),
+			.is_empty_o(RX_buffer_empty_o),
+			.almost_empty_o(RX_buffer_almost_empty_o)
 		);
 		async_queue #(.WORD_WIDTH(WORD_WIDTH), .ADDRESS_WIDTH(BUFFER_ADDRESS_WIDTH), .ALMOST_FULL_THRESHOLD(TX_ALMOST_FULL_THRESHOLD), .ALMOST_EMPTY_THRESHOLD(0)) TX_buffer (
 			.w_clk_i(clk_i),
@@ -157,8 +157,8 @@ generate
 			.re_i(((tx_addr_underflow & L_CLK_L_control) | (CPHA_i & ~SS_sampled & SS_sync)) & ~TX_buffer_empty),
 			.data_i(data_i),
 			.data_o(TX_value),
-			.is_full_o(TX_buffer_full),
-			.almost_full_o(TX_buffer_almost_full),
+			.is_full_o(TX_buffer_full_o),
+			.almost_full_o(TX_buffer_almost_full_o),
 			.is_empty_o(TX_buffer_empty)
 		);
 	end

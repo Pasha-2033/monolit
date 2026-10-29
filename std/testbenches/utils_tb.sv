@@ -17,6 +17,7 @@
 `include "r2s_sync.sv"
 `include "cdc_handshake.sv"
 `include "async_queue.sv"
+`include "clock_mux.sv"
 //`timescale 1ps/1ps
 module utils_tb;
 timeunit 1ns;          // единица времени – наносекунды
@@ -41,6 +42,7 @@ task_const_clk_reductor cclkr();
 task_r2s_sync obs();
 task_cdc_handshake cdc_hsh();
 task_async_queue as_queue();
+task_clock_mux clk_mux();
 initial begin
 	/*
 	$display("_tree_decoder task:");
@@ -100,8 +102,10 @@ initial begin
 	//obs.run();
 	//$display("cdc handshake task:");
 	//cdc_hsh.run();
-	$display("async queue task:");
+	//$display("async queue task:");
 	//as_queue.run();
-	as_queue.arun();
+	//as_queue.arun();
+	$display("clock mux");
+	clk_mux.run();
 end
 endmodule

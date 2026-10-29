@@ -25,7 +25,8 @@ module screening_by_junior #(
 	output	wire					c_o
 );
 // e - per Element
-wire	[WORD_WIDTH:0]	e_or	= {e_or[WORD_WIDTH - 1:0] | data_i, c_i};
-assign					c_o		= e_or[WORD_WIDTH];
-assign					data_o	= {~e_or[WORD_WIDTH - 1:0] & data_i};
+wire [WORD_WIDTH:0] e_or;
+assign e_or	= {e_or[WORD_WIDTH - 1:0] | data_i, c_i};
+assign c_o = e_or[WORD_WIDTH];
+assign data_o = {~e_or[WORD_WIDTH - 1:0] & data_i};
 endmodule

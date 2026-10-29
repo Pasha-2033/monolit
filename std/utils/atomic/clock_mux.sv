@@ -27,7 +27,6 @@ module clock_mux #(
 localparam LENGTH = 2 ** ADDRESS_WIDTH;
 wire [LENGTH - 1:0] selected;
 wire [LENGTH - 1:0] strobed;
-wire [LENGTH - 1:0] allow;
 reg [LENGTH - 1:0] en_reg;
 assign clock_o = |strobed;
 tree_decoder #(.OUTPUT_WIDTH(LENGTH)) decode (
